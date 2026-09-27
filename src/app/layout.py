@@ -12,7 +12,7 @@ Router 是零参调用 `route.component()`，所以这里写成「零参入口 +
 
 import flet as ft
 
-from app.theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs, palette_of
+from app.theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs, bottom_bar_width, palette_of
 from components.app_bar import top_bar
 from components.control_pill import control_pill
 from components.nav_dock import TUNER_ROUTE, is_tuner, nav_dock, nav_index
@@ -95,7 +95,8 @@ def _Shell(outlet: ft.Control, location: str,
                         content=control_pill(p, on_start=start_capture,
                                              on_stop=stop_capture),
                     ),
-                    nav_dock(p, index=nav_index(location), on_select=on_nav_select),  # [5]
+                    nav_dock(p, index=nav_index(location), on_select=on_nav_select,
+                             width=bottom_bar_width(page)),   # [5] 宽屏对齐卡片，窄屏随窗口
                 ],
             ),
         ],

@@ -82,7 +82,8 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState):
         tight=True,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            string_chips(p, GUITAR_STRINGS, active=tuner.active_string(), on_pick=toggle_lock),
+            string_chips(p, GUITAR_STRINGS, active=tuner.active_string(),
+                         on_pick=toggle_lock, width=card_w),
             note_card,
             meter_card,
             hint_card,

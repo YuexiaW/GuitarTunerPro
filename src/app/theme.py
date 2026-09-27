@@ -80,9 +80,8 @@ CONTENT_MAX_WIDTH = 520       # 内容卡片最大宽度（宽窗口下居中限
 CONTENT_MIN_WIDTH = 280       # 卡片最窄宽度
 WINDOW_GUTTER = 40            # 卡片两侧留白
 
-STRING_CHIP_WIDTH = 74        # 琴弦胶囊宽度
-NAV_ITEM_WIDTH = 88           # 底部导航每项宽度
-NAV_ITEM_GAP = 6              # 每项左右各 3px 外边距之和
+CHIP_ROW_SPACING = 6          # 六弦条的列间距（ResponsiveRow 的 spacing，按 col 自动分宽度）
+BOTTOM_BAR_MARGIN = 12        # 底部悬浮条左右安全边距
 
 # 背景光斑的几何（位置/大小固定，颜色与透明度跟着调色板走）
 BLOB_SPEC = [
@@ -169,15 +168,26 @@ def pointer_glow(color: str) -> ft.BoxShadow:
                         color=ft.Colors.with_opacity(0.55, color))
 
 
-def content_width(page) -> float:
-    """内容卡片宽度：min(上限, 窗口宽 - 两侧留白)；拿不到窗口宽（移动端/早期）时按上限走"""
+def window_width(page) -> float:
+    """窗口宽度；拿不到（早期/移动端首帧）时按默认窗口给"""
     try:
         w = page.window.width
     except Exception:
         w = None
     if not w or w < 240:
-        return CONTENT_MAX_WIDTH
-    return max(CONTENT_MIN_WIDTH, min(CONTENT_MAX_WIDTH, w - WINDOW_GUTTER))
+        return CONTENT_MAX_WIDTH + WINDOW_GUTTER
+    return float(w)
+
+
+def content_width(page) -> float:
+    """内容宽度上限：min(上限, 窗口宽 - 两侧留白) —— 只做「宽屏别拉满」的约束，
+    窄屏下横向自适应交给 ResponsiveRow 的 col 分配，不在这里算每个控件的宽度"""
+    return max(CONTENT_MIN_WIDTH, min(CONTENT_MAX_WIDTH, window_width(page) - WINDOW_GUTTER))
+
+
+def bottom_bar_width(page) -> float:
+    """底部悬浮条宽度：不超过内容上限，也不超过窗口（给窄屏留出安全区左右各 12）"""
+    return min(content_width(page), window_width(page) - 24)
 
 
 # ============================================================

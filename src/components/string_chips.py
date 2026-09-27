@@ -1,21 +1,28 @@
-"""六弦胶囊（参数驱动）：一排可点的弦名（点一下锁定该弦，再点取消）
+"""六弦条（响应式）：6 个可点的弦名胶囊，点一下锁定该弦、再点取消
 
-未锁定时高亮自动识别到的那根弦；高亮规则在 controller 里，这里只负责画。
+未锁定时高亮自动识别到的那根弦；高亮规则在 services/tuner.py，这里只负责画。
+
+响应式做法：胶囊不写死宽度，用 ResponsiveRow 的 12 格网格 —— 每个占 2 格（1/6），
+6 个正好一行；窗口再窄也各占 1/6，不会顶出屏幕被裁。`width` 只用来限上限（宽屏别拉满）。
 """
 
 import flet as ft
 
-from app.theme import ACCENT, STRING_CHIP_WIDTH, chip_style, glass
+from app.theme import ACCENT, CHIP_ROW_SPACING, chip_style, glass
+
+CHIP_COL = 2                  # 12 格网格里占 2 格 = 1/6（6 个一行）
 
 
-def string_chips(p: dict, strings: dict, *, active: str | None, on_pick) -> ft.Control:
-    return ft.Row(
+def string_chips(p: dict, strings: dict, *, active: str | None, on_pick,
+                 width: float | None = None) -> ft.Control:
+    row = ft.ResponsiveRow(
         controls=[_chip(p, note, freq, note == active, on_pick)
                   for note, freq in strings.items()],
-        spacing=0,
-        alignment=ft.MainAxisAlignment.CENTER,
+        spacing=CHIP_ROW_SPACING,
+        run_spacing=CHIP_ROW_SPACING,
         vertical_alignment=ft.CrossAxisAlignment.CENTER,
     )
+    return ft.Container(width=width, content=row) if width else row
 
 
 def _chip(p: dict, note: str, freq: float, selected: bool, on_pick) -> ft.Container:
@@ -25,10 +32,9 @@ def _chip(p: dict, note: str, freq: float, selected: bool, on_pick) -> ft.Contai
                   if k in ("bgcolor", "border", "shadow")})
     return ft.Container(
         **style,
-        width=STRING_CHIP_WIDTH,
+        col=CHIP_COL,                      # 宽度由网格算，不写死
         alignment=ft.Alignment(0, 0),
         padding=ft.Padding.symmetric(vertical=8, horizontal=4),
-        margin=ft.Margin.symmetric(horizontal=3),
         animate=ft.Animation(220, ft.AnimationCurve.EASE_OUT),
         ink=True,
         tooltip=f"{note} · {freq:.2f} Hz（点一下锁定该弦）",
