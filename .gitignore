@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environments / secrets
+.env
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Flet
+.flet/
+build/
+storage/
+
+# IDE
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+
+# 录音自检产物（本地测试用，不入库）
+recordings/
+
+# 工具临时目录
+.omo/

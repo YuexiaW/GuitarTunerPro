@@ -1,0 +1,56 @@
+[project]
+name = "guitartuner"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+authors = [
+    { name = "Flet developer", email = "you@example.com" }
+]
+dependencies = [
+    "audioflux>=0.1.9",
+    "flet>=0.86.5",
+    "flet-audio-recorder>=0.86.5",
+    "numpy>=2.2.6",
+]
+
+[project.optional-dependencies]
+# 桌面端麦克风采集; 安卓/iOS 无 pyaudio wheel, 打包时使用 flet-audio-recorder
+desktop = [
+    "pyaudio>=0.2.14",
+]
+
+[dependency-groups]
+dev = [
+    "flet-cli>=0.86.5",
+    "flet-desktop>=0.86.5",
+    "flet-web>=0.86.5",
+    # Integration testing with `flet test` / pytest. The `test` extra brings in
+    # pytest, pytest-asyncio and the screenshot-comparison dependencies.
+    "flet[test]>=0.86.5",
+    # 本地桌面运行需要; 安卓打包时 flet 只安装 project.dependencies, 不会带入
+    "pyaudio>=0.2.14",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.flet]
+org = "com.mycompany"
+product = "guitartuner"
+company = "Flet"
+copyright = "Copyright (C) 2023-2026 by Flet"
+
+[tool.flet.app]
+path = "src"
+
+[tool.flet.android]
+adaptive_icon_background = "#0F1115"
+
+[tool.flet.android.permission]
+"android.permission.RECORD_AUDIO" = true
+
+# Windows 桌面打包需 pyaudio; 安卓/iOS 打包不包含(无安卓 wheel)
+[tool.flet.windows]
+dependencies = ["pyaudio>=0.2.14"]
