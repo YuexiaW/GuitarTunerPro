@@ -14,11 +14,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# 桌面端专用：audioflux 只有 Windows/macOS/Linux 二进制，安卓/iOS 装不了（运行时走纯 numpy 回退）
-# pyaudio 同理，仅桌面采集用；安卓采集用 flet-audio-recorder
+# 桌面端专用（Windows）：audioflux 只有桌面二进制，安卓/iOS 装不了（运行时走纯 numpy 回退）；
+# pyaudio 仅 Windows 有 wheel，Linux 上要编译（需 portaudio19-dev），故加平台标记
 desktop = [
-    "audioflux>=0.1.9",
-    "pyaudio>=0.2.14",
+    "audioflux>=0.1.9; sys_platform == 'win32'",
+    "pyaudio>=0.2.14; sys_platform == 'win32'",
 ]
 
 [dependency-groups]
@@ -29,9 +29,11 @@ dev = [
     # Integration testing with `flet test` / pytest. The `test` extra brings in
     # pytest, pytest-asyncio and the screenshot-comparison dependencies.
     "flet[test]>=0.86.5",
-    # 本地桌面运行需要; 安卓打包时 flet 只安装 project.dependencies, 不会带入
-    "pyaudio>=0.2.14",
-    "audioflux>=0.1.9",
+    # 下面两个只在 Windows 桌面开发时需要（CI 跑在 Linux 上）：
+    # PyAudio 没有 Linux wheel，Linux 上必须编译（要 portaudio19-dev），会让 uv sync 直接失败；
+    # audioflux 是桌面音频引擎，移动端/CI 用不到（安卓走纯 numpy 回退）
+    "pyaudio>=0.2.14; sys_platform == 'win32'",
+    "audioflux>=0.1.9; sys_platform == 'win32'",
 ]
 
 [tool.pytest.ini_options]

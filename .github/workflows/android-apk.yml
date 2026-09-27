@@ -40,6 +40,10 @@ jobs:
         with:
           enable-cache: true
 
+      - name: Install dependencies
+        shell: bash
+        run: uv sync --locked
+
       - name: Build APK
         shell: bash
         env:
