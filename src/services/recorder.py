@@ -13,10 +13,10 @@ import os
 import flet as ft
 import flet_audio_recorder as far
 
-from constants import (
+from core.constants import (
     CAPTURE_FILE, CHANNELS, FRAME_BYTES, POLL_INTERVAL, SAMPLE_RATE,
 )
-from state import TunerState
+from models.state import TunerState
 
 # start() 的返回码
 OK = ""

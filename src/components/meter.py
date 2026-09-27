@@ -6,10 +6,11 @@
 
 import flet as ft
 
-from theme import (
-    ACCENT, IN_TUNE_CENTS, METER_POINTER_TRAVEL, METER_RANGE, METER_WIDTH,
+from app.theme import (
+    ACCENT, METER_POINTER_TRAVEL, METER_RANGE, METER_WIDTH,
     pointer_glow,
 )
+from core.constants import IN_TUNE_CENTS
 
 
 def cents_meter(p: dict, *, cents: float, color: str,

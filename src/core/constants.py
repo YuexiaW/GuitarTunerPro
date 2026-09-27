@@ -1,4 +1,7 @@
-"""运行时参数（采集与检测共用，改参数只改这里）"""
+""""core 层：纯 Python（不认识 flet）—— 运行时参数、检测算法、自相关引擎
+
+运行时参数（采集与检测共用，改参数只改这里）
+"""
 
 import os
 import tempfile
@@ -6,6 +9,10 @@ import tempfile
 # --- 应用信息 ---
 APP_TITLE = "🎸 吉他调音器"
 APP_NAME = "吉他调音器"
+
+# --- 调音判定 ---
+IN_TUNE_CENTS = 5.0      # 「准了」绿区 ±5 音分（检测与偏差条共用）
+DEFAULT_THEME = "dark"   # 启动主题："dark" / "light"
 
 # --- 采集参数 ---
 SAMPLE_RATE = 16000      # 16kHz 足以覆盖吉他最高弦 E4 (329Hz) 及其泛音，且计算延迟更低

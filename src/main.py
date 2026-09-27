@@ -12,7 +12,7 @@
 
 import flet as ft
 
-from app import main
+from app.app import main
 
 if __name__ == "__main__":
     ft.run(main)

@@ -6,8 +6,8 @@ Material AppBar 槽位的老问题：leading 会把子控件拉成 leading_width
 
 import flet as ft
 
-from constants import APP_NAME
-from theme import ACCENT, status_color
+from app.theme import ACCENT, status_color
+from core.constants import APP_NAME
 
 
 def top_bar(p: dict, *, status_text: str, status_level: str, is_dark: bool,

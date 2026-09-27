@@ -6,9 +6,9 @@
 
 import flet as ft
 
+from app.theme import ACCENT, content_width, glass, palette_of
 from components.nav_dock import NAV_ITEMS
-from state import ThemeState, theme_state
-from theme import ACCENT, content_width, glass
+from models.state import ThemeState, theme_state
 
 
 @ft.component
@@ -28,7 +28,7 @@ def SettingsPage():
 
 @ft.component
 def _Placeholder(index: int, theme: ThemeState):
-    p = theme.palette()
+    p = palette_of(theme.name)
     _route, label, icon, desc = NAV_ITEMS[index]
     return ft.Container(
         **glass(p, 28),

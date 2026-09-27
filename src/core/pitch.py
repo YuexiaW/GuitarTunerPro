@@ -10,8 +10,8 @@ import os
 
 import numpy as np
 
-from constants import SIG_GATE
-from tuner_engine import HAS_AUDIOFLUX, AcfDetector
+from core.constants import SIG_GATE
+from core.tuner_engine import HAS_AUDIOFLUX, AcfDetector
 
 if HAS_AUDIOFLUX:
     import audioflux as af

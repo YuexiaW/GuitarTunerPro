@@ -1,26 +1,23 @@
-"""可观察状态（模块级单例）
+"""models.state —— 可观察状态（模块级单例）
 
 写法（Flet 的 Observable 实现 + 项目约定）：
   - 类级字段 + 默认值，**不写 `__init__`**、**不用 `@dataclass`**、**不用 `@property`**；
   - 变化靠**赋值**触发通知（`self.note = ...`）；list/dict/bytearray 的原地改动不通知；
-  - 派生值写成方法（`palette()` / `has_pitch()`），只在渲染时调用；
-  - 组件要收到变化 = 把实例**作为参数**传进去（订阅按参数建立），模块级 import 读不算。
+  - 派生值写成方法（`is_dark()` / `has_pitch()`），只在渲染时调用；
+  - 组件要收到变化 = 把实例**作为参数**传进去（订阅按参数建立），模块级 import 读不算；
+  - 本层不认识 flet 界面：配色查表在 app.theme.palette_of(name)，这里只存名字。
 """
 
 import flet as ft
 
-from theme import DEFAULT_THEME, PALETTES
+from core.constants import DEFAULT_THEME
 
 
 @ft.observable
 class ThemeState:
-    """当前主题（两套调色板之一）"""
+    """当前主题（只存名字，取色在 app.theme.palette_of）"""
 
     name: str = DEFAULT_THEME           # "dark" / "light"
-
-    def palette(self) -> dict:
-        """当前调色板（组件里 theme.palette() 取色）"""
-        return PALETTES[self.name]
 
     def is_dark(self) -> bool:
         return self.name == "dark"

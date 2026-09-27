@@ -1,7 +1,7 @@
-"""视觉：暗/浅两套调色板 + 毛玻璃配方 + 主题登记表
+"""app.theme —— UI 主题：暗/浅两套调色板 + 毛玻璃配方 + 尺寸常量
 
-主题切换不重建界面：Theme 记录「哪些控件的哪个属性跟着调色板走」（登记表 skins），
-切换时按新调色板刷一遍；app 侧额外要刷的控件挂在 Theme.on_repaint 上。
+状态层（models.state.ThemeState）只存主题名，取色用这里的 palette_of(name)；
+声明式组件按参数订阅状态，主题一变就自己重渲染，没有「登记表刷属性」那套东西了。
 
 布局与配方取自 MiluMusic/tests/appbar_nav.py：渐变底 + 模糊光斑 + 毛玻璃卡片。
 """
@@ -15,8 +15,6 @@ WARN = "#FFB020"
 
 _WHITE = ft.Colors.WHITE
 _BLACK = ft.Colors.BLACK
-
-DEFAULT_THEME = "dark"
 
 PALETTES = {
     "dark": dict(
@@ -74,7 +72,6 @@ PALETTES = {
 BOTTOM_RESERVE = 200          # 底部悬浮层预留高度：内容滚到底不被玻璃压住
 CONTROL_PILL_BOTTOM = 96      # 按钮胶囊贴底偏移（叠在导航条上方）
 
-IN_TUNE_CENTS = 5.0           # 「准了」绿区 ±5 音分
 METER_RANGE = 50.0            # 偏差条量程 ±50 音分
 METER_WIDTH = 320             # 偏差条轨道宽度
 METER_POINTER_TRAVEL = 5.5    # 指针位移上限（以自身宽度为单位 → ±50 音分 ≈ ±132px）
@@ -96,8 +93,13 @@ BLOB_SPEC = [
 
 
 # ============================================================
-# 配方
+# 取色 / 配方
 # ============================================================
+def palette_of(name: str) -> dict:
+    """主题名 → 调色板（状态层只存名字，取色留在 UI 层，models 不用反向依赖 app）"""
+    return PALETTES[name]
+
+
 def blobs(p: dict) -> list[ft.Container]:
     """背景光斑：内容滑过悬浮玻璃时背后颜色会变，玻璃才看得出来"""
     return [

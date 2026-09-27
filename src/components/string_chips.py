@@ -5,7 +5,7 @@
 
 import flet as ft
 
-from theme import ACCENT, STRING_CHIP_WIDTH, chip_style, glass
+from app.theme import ACCENT, STRING_CHIP_WIDTH, chip_style, glass
 
 
 def string_chips(p: dict, strings: dict, *, active: str | None, on_pick) -> ft.Control:

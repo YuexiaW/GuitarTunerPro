@@ -2,7 +2,7 @@
 
 import flet as ft
 
-from theme import ACCENT, glass
+from app.theme import ACCENT, glass
 
 
 def control_pill(p: dict, *, on_start, on_stop) -> ft.Control:

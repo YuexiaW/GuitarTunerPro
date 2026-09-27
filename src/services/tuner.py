@@ -8,11 +8,10 @@ import time
 
 import flet as ft
 
+from core.constants import IN_TUNE_CENTS, SAMPLE_RATE, UPDATE_INTERVAL
+from core.pitch import GUITAR_STRINGS, PitchAnalyzer, nearest_string
+from models.state import pitch_state, tuner_state
 from services.recorder import PERMISSION_DENIED, RecorderService
-from constants import SAMPLE_RATE, UPDATE_INTERVAL
-from pitch import GUITAR_STRINGS, PitchAnalyzer, nearest_string
-from state import pitch_state, tuner_state
-from theme import IN_TUNE_CENTS
 
 _analyzer: PitchAnalyzer | None = None
 _recorder: RecorderService | None = None

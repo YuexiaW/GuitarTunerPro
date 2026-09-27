@@ -12,12 +12,12 @@ Router 是零参调用 `route.component()`，所以这里写成「零参入口 +
 
 import flet as ft
 
+from app.theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs, palette_of
 from components.app_bar import top_bar
 from components.control_pill import control_pill
 from components.nav_dock import TUNER_ROUTE, is_tuner, nav_dock, nav_index
+from models.state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
 from services.tuner import start_capture, stop_capture
-from state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
-from theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs
 
 HELP_TEXT = ("拨动单根弦、靠近麦克风；指针停在中间绿区（±5 音分）就是准了。"
              "点内容区那排弦名可锁定该弦。")
@@ -34,7 +34,7 @@ def Layout():
 @ft.component
 def _Shell(outlet: ft.Control, location: str,
            theme: ThemeState, pitch: PitchState, tuner: TunerState):
-    p = theme.palette()                     # 参数里的 observable：读它 = 订阅
+    p = palette_of(theme.name)               # 参数里的 observable：读它 = 订阅
     page = ft.context.page
 
     def show_help(e=None):

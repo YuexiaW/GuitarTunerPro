@@ -6,7 +6,7 @@
 
 import flet as ft
 
-from theme import ACCENT, NAV_ITEM_GAP, NAV_ITEM_WIDTH, glass, item_style
+from app.theme import ACCENT, NAV_ITEM_GAP, NAV_ITEM_WIDTH, glass, item_style
 
 # (路由, 标签, 图标, 说明)
 NAV_ITEMS = [

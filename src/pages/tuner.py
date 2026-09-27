@@ -6,12 +6,12 @@
 
 import flet as ft
 
+from app.theme import ACCENT, BAD, content_width, glass, palette_of
 from components.meter import cents_meter
 from components.string_chips import string_chips
+from core.pitch import GUITAR_STRINGS
+from models.state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
 from services.tuner import toggle_lock
-from pitch import GUITAR_STRINGS
-from state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
-from theme import ACCENT, BAD, content_width, glass
 
 HINT_TEXT = "拨动单根弦并靠近麦克风 · 点上面那排弦名可锁定该弦 · 指针停在中间绿区即准"
 
@@ -24,7 +24,7 @@ def PitchPage():
 
 @ft.component
 def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState):
-    p = theme.palette()                     # 读参数里的 observable = 订阅
+    p = palette_of(theme.name)              # 读参数里的 observable = 订阅
     card_w = content_width(ft.context.page)
 
     has_pitch = pitch.has_pitch()
