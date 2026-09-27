@@ -1,14 +1,14 @@
-"""编排层：采集 → 检测 → 状态（UI 只读状态，不认识采集/检测细节）
+"""services/tuner.py —— 调音编排：采集 → 检测 → 状态（UI 只读状态，不认识采集/检测细节）
 
-对应参考骨架里的 services + core：main() 里 attach(page) 一次，
-之后组件通过 start_capture / stop_capture / toggle_lock 触发动作。
+main() 里 attach(page) 一次；之后组件把 start_capture / stop_capture / toggle_lock 当回调传。
+检测算法在 pitch.py（纯 Python、不认识 flet），采集在 services/recorder.py。
 """
 
 import time
 
 import flet as ft
 
-from audio import PERMISSION_DENIED, RecorderService
+from services.recorder import PERMISSION_DENIED, RecorderService
 from constants import SAMPLE_RATE, UPDATE_INTERVAL
 from pitch import GUITAR_STRINGS, PitchAnalyzer, nearest_string
 from state import pitch_state, tuner_state

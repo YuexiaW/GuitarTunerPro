@@ -15,7 +15,7 @@ import flet as ft
 from components.app_bar import top_bar
 from components.control_pill import control_pill
 from components.nav_dock import TUNER_ROUTE, is_tuner, nav_dock, nav_index
-from controller import start_capture, stop_capture
+from services.tuner import start_capture, stop_capture
 from state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
 from theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs
 

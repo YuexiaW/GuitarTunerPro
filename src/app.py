@@ -14,7 +14,7 @@ import os
 import flet as ft
 
 from constants import APP_TITLE
-from controller import attach, start_capture
+from services.tuner import attach, start_capture
 from layout import Layout
 from pages.placeholder import ChordsPage, MetronomePage, SettingsPage
 from pages.tuner import PitchPage

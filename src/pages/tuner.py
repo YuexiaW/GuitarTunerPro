@@ -8,7 +8,7 @@ import flet as ft
 
 from components.meter import cents_meter
 from components.string_chips import string_chips
-from controller import toggle_lock
+from services.tuner import toggle_lock
 from pitch import GUITAR_STRINGS
 from state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
 from theme import ACCENT, BAD, content_width, glass
