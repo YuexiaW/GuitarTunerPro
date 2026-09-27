@@ -73,6 +73,11 @@ def main(page: ft.Page):
     page.padding = 30
     page.theme_mode = ft.ThemeMode.LIGHT
 
+    # 移动端（安卓/iOS）用 on_stream 流式采集：插件直接推 PCM16 分片，
+    # 不写文件，避免安卓沙箱路径不可写导致 start_recording 直接失败；
+    # 桌面端（实测 Windows）on_stream 不推送任何分片，所以走 WAV 文件 + 轮询读取。
+    is_mobile = page.platform.is_mobile()
+
     # --- UI 组件 ---
     note_text = ft.Text("?", size=90, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
     freq_text = ft.Text("-- Hz", size=24, color=ft.Colors.GREY_600)
@@ -111,6 +116,7 @@ def main(page: ft.Page):
     buffer = bytearray()
     last_update_time = 0.0
     is_running = False
+    stream_bytes = 0  # 流式收到的字节数（用于判断 on_stream 是否真的在推数据）
 
     def show_snackbar(message: str):
         page.show_dialog(ft.SnackBar(content=ft.Text(message), duration=ft.Duration(seconds=3)))
@@ -224,7 +230,7 @@ def main(page: ft.Page):
             await asyncio.sleep(POLL_INTERVAL)
 
     async def handle_recording_start(e: ft.ControlEvent):
-        nonlocal is_running
+        nonlocal is_running, stream_bytes
         if is_running:
             return
         if not await recorder.has_permission():
@@ -232,6 +238,7 @@ def main(page: ft.Page):
             return
 
         buffer.clear()
+        stream_bytes = 0
         try:
             os.remove(CAPTURE_FILE)
         except OSError:
@@ -241,27 +248,44 @@ def main(page: ft.Page):
         status.color = ft.Colors.BLUE
         page.update()
 
+        err_detail = ""
         try:
-            ok = await recorder.start_recording(
-                output_path=CAPTURE_FILE,
-                configuration=far.AudioRecorderConfiguration(
-                    encoder=far.AudioEncoder.WAV,
-                    sample_rate=SAMPLE_RATE,
-                    channels=CHANNELS,
-                ),
-            )
+            if is_mobile:
+                # 流式：必须用 PCM16BITS，且不能传 output_path
+                ok = await recorder.start_recording(
+                    configuration=far.AudioRecorderConfiguration(
+                        encoder=far.AudioEncoder.PCM16BITS,
+                        sample_rate=SAMPLE_RATE,
+                        channels=CHANNELS,
+                    ),
+                )
+            else:
+                ok = await recorder.start_recording(
+                    output_path=CAPTURE_FILE,
+                    configuration=far.AudioRecorderConfiguration(
+                        encoder=far.AudioEncoder.WAV,
+                        sample_rate=SAMPLE_RATE,
+                        channels=CHANNELS,
+                    ),
+                )
         except Exception as ex:
             ok = False
-            print(f"录音启动失败: {ex}", flush=True)
+            err_detail = f"{type(ex).__name__}: {ex}"
+            print(f"录音启动失败: {err_detail}", flush=True)
 
         if not ok:
-            status.value = "❌ 无法打开麦克风！"
+            # 安卓上看不到 stdout，把原因直接显示在界面上，方便定位
+            detail = err_detail or await _startup_diagnostics()
+            status.value = f"❌ 无法打开麦克风！{detail}"
             status.color = ft.Colors.RED
             page.update()
             return
 
         is_running = True
-        page.run_task(capture_loop)
+        if is_mobile:
+            page.run_task(_stream_watchdog)
+        else:
+            page.run_task(capture_loop)
 
     async def handle_recording_stop(e: ft.ControlEvent):
         nonlocal is_running
@@ -285,8 +309,44 @@ def main(page: ft.Page):
         pointer.offset = ft.Offset(0, 0)
         page.update()
 
+    def handle_stream(e):
+        """移动端流式回调：插件推 PCM16 分片，攒够一帧就送去检测"""
+        nonlocal stream_bytes
+        chunk = getattr(e, "chunk", None)
+        if chunk is None:  # 兜底：事件字段在不同平台/版本上形态可能不同
+            chunk = getattr(e, "data", None)
+        if not isinstance(chunk, (bytes, bytearray)):
+            return
+        stream_bytes += len(chunk)
+        buffer.extend(chunk)
+        while len(buffer) >= FRAME_BYTES:
+            frame = bytes(buffer[:FRAME_BYTES])
+            del buffer[:FRAME_BYTES]
+            process_audio(frame)
+
+    async def _stream_watchdog():
+        """启动后 3 秒仍无任何分片 → 说明该平台 on_stream 不推送，直接提示用户"""
+        await asyncio.sleep(3)
+        if is_running and stream_bytes == 0:
+            status.value = "⚠️ 已开始录音但没收到音频流（on_stream 未推送），需要换采集方式"
+            status.color = ft.Colors.ORANGE
+            page.update()
+
+    async def _startup_diagnostics() -> str:
+        """启动失败时把原因写进界面（安卓上看不到 print 输出）"""
+        parts = [f"平台={page.platform}"]
+        for name, enc in (("PCM16", far.AudioEncoder.PCM16BITS), ("WAV", far.AudioEncoder.WAV)):
+            try:
+                supported = await recorder.is_supported_encoder(enc)
+                parts.append(f"{name}={'支持' if supported else '不支持'}")
+            except Exception as ex:
+                parts.append(f"{name}探测失败({type(ex).__name__})")
+        parts.append(f"目录可写={os.access(os.path.dirname(CAPTURE_FILE), os.W_OK)}")
+        return "，".join(parts)
+
     # --- 实例化 Recorder (Service，无需 page.add) ---
-    recorder = far.AudioRecorder()
+    # 移动端挂 on_stream 走流式；桌面端不能挂（挂了会强制流式模式，与 WAV 文件模式冲突）
+    recorder = far.AudioRecorder(on_stream=handle_stream) if is_mobile else far.AudioRecorder()
 
     # --- 布局组装 ---
     page.add(
