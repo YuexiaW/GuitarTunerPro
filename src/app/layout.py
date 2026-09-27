@@ -60,9 +60,7 @@ def _Shell(outlet: ft.Control, location: str,
             )
         ),
         appbar=top_bar(p, status_text=pitch.status_text, status_level=pitch.status_level,
-                       is_dark=theme.is_dark(),
-                       on_help=show_help,
-                       on_toggle_theme=theme.toggle),
+                       on_help=show_help),
         controls=[
             ft.Stack(
                 expand=True,

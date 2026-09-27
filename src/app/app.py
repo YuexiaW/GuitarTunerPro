@@ -14,8 +14,8 @@ import os
 import flet as ft
 
 from app.layout import Layout
+from components.app_bar import apply_theme
 from core.constants import APP_TITLE
-from models.state import theme_state
 from pages.placeholder import ChordsPage, MetronomePage, SettingsPage
 from pages.tuner import PitchPage
 from services.tuner import attach, start_capture
@@ -45,7 +45,7 @@ def main(page: ft.Page):
     page.padding = 0                     # 默认 10 会顶开四周
     page.spacing = 0
     page.bgcolor = ft.Colors.TRANSPARENT  # 底色交给 View 的渐变
-    page.theme_mode = ft.ThemeMode.DARK if theme_state.is_dark() else ft.ThemeMode.LIGHT
+    apply_theme(page)                     # 初始主题（切换逻辑在 components/app_bar.py）
 
     def show_message(text: str):
         page.show_dialog(ft.SnackBar(content=ft.Text(text),

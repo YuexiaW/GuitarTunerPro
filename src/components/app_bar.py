@@ -1,4 +1,10 @@
-"""顶部栏（参数驱动）：leading 渐变 logo / title 应用名 + 实时状态 / actions 帮助 + 主题切换
+"""顶部栏 + 主题切换（全应用唯一处理主题切换的地方）
+
+三段槽位：leading 渐变 logo / title 应用名 + 实时状态 / actions 使用说明 + 主题切换。
+
+主题切换的三件事都收在本模块：状态（models.state.theme_state.name）、切换动作
+（`_toggle_theme`）、按钮图标与 tooltip。其他模块只按 `theme_state.name` 取色
+（app.theme.palette_of），不写任何切换逻辑 —— 别在 layout/pages 里再挂切换回调。
 
 Material AppBar 槽位的老问题：leading 会把子控件拉成 leading_width × toolbar_height，
 所以外面套一层居中容器；elevation 必须为 0，否则 M3 会用 surfaceTint 掺色，半透明底就不透了。
@@ -8,10 +14,28 @@ import flet as ft
 
 from app.theme import ACCENT, status_color
 from core.constants import APP_NAME
+from models.state import theme_state
+
+THEME_DARK = "dark"
+THEME_LIGHT = "light"
 
 
-def top_bar(p: dict, *, status_text: str, status_level: str, is_dark: bool,
-            on_help, on_toggle_theme) -> ft.AppBar:
+def apply_theme(page: ft.Page):
+    """把当前主题同步到页面（启动时调一次；之后每次切换由 _toggle_theme 自己同步）"""
+    page.theme_mode = (
+        ft.ThemeMode.LIGHT if theme_state.name == THEME_LIGHT else ft.ThemeMode.DARK
+    )
+
+
+def _toggle_theme(e=None):
+    """切主题：只换主题名 + 同步 page.theme_mode；界面靠状态订阅自己重渲染"""
+    theme_state.name = THEME_LIGHT if theme_state.name == THEME_DARK else THEME_DARK
+    apply_theme(ft.context.page)
+
+
+def top_bar(p: dict, *, status_text: str, status_level: str, on_help) -> ft.AppBar:
+    is_dark = theme_state.name == THEME_DARK      # 读主题状态 → 切换时本组件跟着重渲染
+
     logo = ft.Container(
         width=36, height=36,
         border_radius=ft.BorderRadius.all(12),
@@ -37,7 +61,7 @@ def top_bar(p: dict, *, status_text: str, status_level: str, is_dark: bool,
         icon_color=p["appbar_fg"],
         icon_size=22,
         tooltip="切换浅色主题" if is_dark else "切换深色主题",
-        on_click=lambda e: on_toggle_theme(),
+        on_click=_toggle_theme,
     )
     help_btn = ft.IconButton(
         icon=ft.Icons.HELP_OUTLINE, icon_color=p["appbar_fg"],

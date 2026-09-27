@@ -3,9 +3,10 @@
 写法（Flet 的 Observable 实现 + 项目约定）：
   - 类级字段 + 默认值，**不写 `__init__`**、**不用 `@dataclass`**、**不用 `@property`**；
   - 变化靠**赋值**触发通知（`self.note = ...`）；list/dict/bytearray 的原地改动不通知；
-  - 派生值写成方法（`is_dark()` / `has_pitch()`），只在渲染时调用；
+  - 派生值写成方法（`has_pitch()` / `active_string()`），只在渲染时调用；
   - 组件要收到变化 = 把实例**作为参数**传进去（订阅按参数建立），模块级 import 读不算；
-  - 本层不认识 flet 界面：配色查表在 app.theme.palette_of(name)，这里只存名字。
+  - 本层不认识 flet 界面：这里只存裸状态，配色查表在 app.theme.palette_of(name)，
+    主题**切换**逻辑在 components/app_bar.py。
 """
 
 import flet as ft
@@ -15,19 +16,9 @@ from core.constants import DEFAULT_THEME
 
 @ft.observable
 class ThemeState:
-    """当前主题（只存名字，取色在 app.theme.palette_of）"""
+    """当前主题名（纯数据：取色 app.theme.palette_of，切换在 components/app_bar.py）"""
 
     name: str = DEFAULT_THEME           # "dark" / "light"
-
-    def is_dark(self) -> bool:
-        return self.name == "dark"
-
-    def toggle(self):
-        """切换主题：换调色板 + 同步页面 theme_mode（订阅者收到变化后自己重渲染）"""
-        self.name = "light" if self.is_dark() else "dark"
-        ft.context.page.theme_mode = (
-            ft.ThemeMode.LIGHT if self.name == "light" else ft.ThemeMode.DARK
-        )
 
 
 @ft.observable
