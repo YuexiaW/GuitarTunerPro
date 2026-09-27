@@ -342,7 +342,6 @@ name = "guitartuner"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "audioflux" },
     { name = "flet" },
     { name = "flet-audio-recorder" },
     { name = "numpy" },
@@ -350,11 +349,13 @@ dependencies = [
 
 [package.optional-dependencies]
 desktop = [
+    { name = "audioflux" },
     { name = "pyaudio" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "audioflux" },
     { name = "flet", extra = ["test"] },
     { name = "flet-cli" },
     { name = "flet-desktop" },
@@ -364,7 +365,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "audioflux", specifier = ">=0.1.9" },
+    { name = "audioflux", marker = "extra == 'desktop'", specifier = ">=0.1.9" },
     { name = "flet", specifier = ">=0.86.5" },
     { name = "flet-audio-recorder", specifier = ">=0.86.5" },
     { name = "numpy", specifier = ">=2.2.6" },
@@ -374,6 +375,7 @@ provides-extras = ["desktop"]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "audioflux", specifier = ">=0.1.9" },
     { name = "flet", extras = ["test"], specifier = ">=0.86.5" },
     { name = "flet-cli", specifier = ">=0.86.5" },
     { name = "flet-desktop", specifier = ">=0.86.5" },

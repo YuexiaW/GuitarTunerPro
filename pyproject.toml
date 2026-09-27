@@ -8,15 +8,16 @@ authors = [
     { name = "Flet developer", email = "you@example.com" }
 ]
 dependencies = [
-    "audioflux>=0.1.9",
     "flet>=0.86.5",
     "flet-audio-recorder>=0.86.5",
     "numpy>=2.2.6",
 ]
 
 [project.optional-dependencies]
-# 桌面端麦克风采集; 安卓/iOS 无 pyaudio wheel, 打包时使用 flet-audio-recorder
+# 桌面端专用：audioflux 只有 Windows/macOS/Linux 二进制，安卓/iOS 装不了（运行时走纯 numpy 回退）
+# pyaudio 同理，仅桌面采集用；安卓采集用 flet-audio-recorder
 desktop = [
+    "audioflux>=0.1.9",
     "pyaudio>=0.2.14",
 ]
 
@@ -30,6 +31,7 @@ dev = [
     "flet[test]>=0.86.5",
     # 本地桌面运行需要; 安卓打包时 flet 只安装 project.dependencies, 不会带入
     "pyaudio>=0.2.14",
+    "audioflux>=0.1.9",
 ]
 
 [tool.pytest.ini_options]
@@ -51,6 +53,6 @@ adaptive_icon_background = "#0F1115"
 [tool.flet.android.permission]
 "android.permission.RECORD_AUDIO" = true
 
-# Windows 桌面打包需 pyaudio; 安卓/iOS 打包不包含(无安卓 wheel)
+# Windows 桌面打包需 pyaudio + audioflux; 安卓打包不包含(无安卓二进制)
 [tool.flet.windows]
-dependencies = ["pyaudio>=0.2.14"]
+dependencies = ["audioflux>=0.1.9", "pyaudio>=0.2.14"]

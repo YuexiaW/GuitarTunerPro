@@ -7,7 +7,13 @@ import time
 import flet as ft
 import flet_audio_recorder as far
 import numpy as np
-import audioflux as af
+
+from tuner_engine import AcfDetector, HAS_AUDIOFLUX
+
+if HAS_AUDIOFLUX:
+    import audioflux as af
+else:  # 安卓/iOS：audioflux 无二进制，走纯 numpy 自相关
+    af = None
 
 # --- 配置参数 ---
 SAMPLE_RATE = 16000  # 16kHz 足以覆盖吉他最高弦 E4 (329Hz) 及其泛音，且计算延迟更低
@@ -98,8 +104,8 @@ def main(page: ft.Page):
 
     cents_text = ft.Text("0.0 cents", size=18, weight=ft.FontWeight.W_500, color=ft.Colors.GREY_700)
 
-    # --- AudioFlux 初始化 ---
-    pitch_detector = af.PitchYIN(samplate=SAMPLE_RATE)
+    # --- 音高检测器初始化（安卓/iOS 无 audioflux，自动用纯 numpy 自相关） ---
+    pitch_detector = af.PitchYIN(samplate=SAMPLE_RATE) if HAS_AUDIOFLUX else AcfDetector(SAMPLE_RATE)
 
     # --- 状态变量 ---
     buffer = bytearray()
@@ -124,25 +130,29 @@ def main(page: ft.Page):
         """对一段 PCM16 数据做音高检测并更新 UI（on_stream 在桌面端不推送，改由轮询回调驱动）"""
         nonlocal last_update_time
 
-        # 转换为 float32 数组并归一化到 [-1.0, 1.0]
+        # 转换并归一化；检测器分两条路：audioflux PitchYIN / 纯 numpy 自相关
         audio_data = np.frombuffer(pcm_bytes, dtype=np.int16).astype(np.float32) / 32768.0
 
-        # 噪声门限：安静房间的底噪会让 PitchYIN 偶尔吐出 200~330Hz 的杂散值，
-        # 低于门限的帧直接跳过，避免界面乱跳音符
-        rms = float(np.sqrt(np.mean(audio_data ** 2)))
-        if rms < SIG_GATE:
-            if os.environ.get("TUNER_DEBUG"):
-                print(f"[dbg] rms={rms:.4f} 低于门限，跳过", flush=True)
-            return
+        if HAS_AUDIOFLUX:
+            # 噪声门限：安静房间的底噪会让 PitchYIN 偶尔吐出 200~330Hz 的杂散值
+            rms = float(np.sqrt(np.mean(audio_data ** 2)))
+            if rms < SIG_GATE:
+                if os.environ.get("TUNER_DEBUG"):
+                    print(f"[dbg] rms={rms:.4f} 低于门限，跳过", flush=True)
+                return
 
-        # 前置低通：PitchYIN 对含高频噪声的弱基频信号会返回 0.0(判为无声)
-        audio_data = _lowpass(audio_data)
+            # 前置低通：PitchYIN 对含高频噪声的弱基频信号会返回 0.0(判为无声)
+            filtered = _lowpass(audio_data)
+            fre_arr, _, _ = pitch_detector.pitch(np.ascontiguousarray(filtered.astype(np.float32)))
+            # 过滤有效频率 (吉他基频范围约 80-330Hz，放宽至 60-500Hz 容纳泛音)
+            valid_freqs = [float(f) for f in fre_arr if 60.0 < float(f) < 500.0]
+            rms = float(np.sqrt(np.mean(audio_data ** 2)))
+        else:
+            # 回退路径：门限与低通在 AcfDetector 内部完成
+            rms = float(np.sqrt(np.mean(audio_data ** 2)))
+            freq, conf = pitch_detector.detect(audio_data)
+            valid_freqs = [freq] if freq > 0 and conf >= 0.4 else []
 
-        # AudioFlux 音高检测
-        fre_arr, _, _ = pitch_detector.pitch(np.ascontiguousarray(audio_data.astype(np.float32)))
-
-        # 过滤有效频率 (吉他基频范围约 80-330Hz，放宽至 60-500Hz 容纳泛音)
-        valid_freqs = [float(f) for f in fre_arr if 60.0 < float(f) < 500.0]
         if os.environ.get("TUNER_DEBUG"):
             print(f"[dbg] rms={rms:.4f} freqs={valid_freqs[:5]}", flush=True)
 

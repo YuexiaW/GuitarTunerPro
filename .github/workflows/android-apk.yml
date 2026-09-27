@@ -1,0 +1,62 @@
+# 安卓 APK 打包流水线
+# 参考 https://github.com/ndonkoHenri/flet-github-action-workflows (docs.flet.dev/publish/#github-actions)
+#
+# 用法：
+#   1. 手动触发：Actions → Build Android APK → Run workflow（可填版本号/构建号）
+#   2. 打 tag 触发：git tag v0.1.0 && git push origin v0.1.0
+#   产物：Actions 页面该次运行的 Artifacts → apk-build-artifact（内含 app-release.apk）
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_version:
+        description: "版本号 BUILD_VERSION（留空则用 pyproject.toml 里的 version）"
+        required: false
+        default: ""
+      build_number:
+        description: "构建号 BUILD_NUMBER（留空则用 GitHub run number）"
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+env:
+  UV_PYTHON: "3.12"          # 与 .python-version / requires-python 保持一致
+  PYTHONUTF8: "1"
+  FLET_CLI_NO_RICH_OUTPUT: "1"   # 关掉 rich 输出，日志更干净
+
+jobs:
+  apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Build APK
+        shell: bash
+        env:
+          BUILD_VERSION: ${{ inputs.build_version }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        run: |
+          set -euo pipefail
+          args=(--yes --verbose)
+          if [ -n "${BUILD_VERSION:-}" ]; then args+=(--build-version "$BUILD_VERSION"); fi
+          if [ -n "${BUILD_NUMBER:-}" ]; then args+=(--build-number "$BUILD_NUMBER"); fi
+          echo "flet build apk ${args[*]}"
+          uv run flet build apk "${args[@]}"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v5.0.0
+        with:
+          name: apk-build-artifact
+          path: build/apk
+          if-no-files-found: error
+          overwrite: false
