@@ -30,11 +30,13 @@ PALETTES = {
         text_faint=ft.Colors.with_opacity(0.55, _WHITE),
         appbar_bg=ft.Colors.with_opacity(0.45, _BLACK),
         appbar_fg=_WHITE,
-        chip_bg=ft.Colors.with_opacity(0.08, _WHITE),       # 未选中的琴弦胶囊
-        chip_border=ft.Colors.with_opacity(0.18, _WHITE),
-        sel_bg=ft.Colors.with_opacity(0.30, _WHITE),        # 选中态
-        sel_border=ft.Colors.with_opacity(0.45, _WHITE),
-        sel_glow=ft.Colors.with_opacity(0.28, _WHITE),
+        chip_bg=ft.Colors.TRANSPARENT,                      # 平铺胶囊：不填色，只描边
+        chip_border=ft.Colors.with_opacity(0.22, _WHITE),
+        sel_bg=ft.Colors.with_opacity(0.16, ACCENT),        # 选中态：绿点缀的淡色块
+        sel_border=ft.Colors.with_opacity(0.70, ACCENT),
+        sel_text=ACCENT,
+        line=ft.Colors.with_opacity(0.12, _WHITE),          # 分隔细线
+        avatar_bg=ft.Colors.with_opacity(0.30, _BLACK),      # 头像内圈（平铺，不模糊）
         track_bg=ft.Colors.with_opacity(0.16, _WHITE),      # 偏差条轨道
         tick=ft.Colors.with_opacity(0.75, _WHITE),          # 正中刻度
         stop_bg=ft.Colors.with_opacity(0.18, _WHITE),
@@ -53,12 +55,13 @@ PALETTES = {
         text_faint=ft.Colors.with_opacity(0.45, _BLACK),
         appbar_bg=ft.Colors.with_opacity(0.55, _WHITE),
         appbar_fg="#1A1A1A",
-        chip_bg=ft.Colors.with_opacity(0.45, _WHITE),
-        chip_border=ft.Colors.with_opacity(0.55, _WHITE),
-        # 浅色下白调高亮区分不出来，选中态改用绿色描边 + 绿色柔光
-        sel_bg=ft.Colors.with_opacity(0.90, _WHITE),
-        sel_border=ft.Colors.with_opacity(0.55, ACCENT),
-        sel_glow=ft.Colors.with_opacity(0.20, ACCENT),
+        chip_bg=ft.Colors.TRANSPARENT,
+        chip_border=ft.Colors.with_opacity(0.18, _BLACK),
+        sel_bg=ft.Colors.with_opacity(0.16, ACCENT),
+        sel_border=ft.Colors.with_opacity(0.70, ACCENT),
+        sel_text="#0F8A56",                                 # 浅色底下绿字要压深才看得清
+        line=ft.Colors.with_opacity(0.12, _BLACK),
+        avatar_bg=ft.Colors.with_opacity(0.55, _WHITE),
         track_bg=ft.Colors.with_opacity(0.10, _BLACK),
         tick=ft.Colors.with_opacity(0.55, _BLACK),
         stop_bg=ft.Colors.with_opacity(0.06, _BLACK),
@@ -117,7 +120,9 @@ def blobs(p: dict) -> list[ft.Container]:
 def glass(p: dict, radius: int = 24, soft: bool = False) -> dict:
     """毛玻璃：半透明底 + BackdropFilter + 高光边 + 投影
 
-    soft=True 用更淡的底色（提示条 / 琴弦胶囊那种轻薄玻璃）
+    **只给底部悬浮层用**（导航条、它上面的控制胶囊）—— 用户明确说过毛玻璃只是导航栏的设计，
+    页面内容一律平铺在渐变底上，不要拿这个把整页内容包成一堆透明框。
+    soft=True 用更淡的底色。
     """
     return dict(
         bgcolor=ft.Colors.with_opacity(
@@ -136,30 +141,37 @@ def glass(p: dict, radius: int = 24, soft: bool = False) -> dict:
 
 
 def item_style(p: dict, selected: bool) -> dict:
-    """底部导航项 / 琴弦胶囊的选中态"""
+    """选中态：绿点缀的淡色块 + 绿描边（平铺，不带玻璃/投影）"""
     if selected:
         return dict(
             bgcolor=p["sel_bg"],
             border=ft.Border.all(1, p["sel_border"]),
-            shadow=ft.BoxShadow(blur_radius=14, offset=ft.Offset(0, 0),
-                                color=p["sel_glow"]),
         )
+    # 透明边占位：选中/未选中宽度一致，过渡才不抖
     return dict(
         bgcolor=ft.Colors.TRANSPARENT,
-        # 透明边占位：选中/未选中宽度一致，过渡才不抖
         border=ft.Border.all(1, ft.Colors.TRANSPARENT),
-        shadow=ft.BoxShadow(blur_radius=14, offset=ft.Offset(0, 0),
-                            color=ft.Colors.TRANSPARENT),
     )
 
 
 def chip_style(p: dict, selected: bool) -> dict:
-    """琴弦胶囊：未选中也留一层淡玻璃（底色/描边比导航项更轻）"""
-    style = item_style(p, selected)
-    if not selected:
-        style["bgcolor"] = p["chip_bg"]
-        style["border"] = ft.Border.all(1, p["chip_border"])
-    return style
+    """平铺胶囊（弦名 / 参考音）：未选中只描一圈细边，不填色"""
+    if selected:
+        return item_style(p, True)
+    return dict(
+        bgcolor=p["chip_bg"],
+        border=ft.Border.all(1, p["chip_border"]),
+    )
+
+
+def selected_text(p: dict, selected: bool, default: str | None = None) -> str:
+    """胶囊文字色：选中用绿点缀，未选中给默认色"""
+    return p["sel_text"] if selected else (default or p["text"])
+
+
+def hairline(p: dict, width=None) -> ft.Container:
+    """细分隔线：页面不套卡片，靠留白 + 细线分区"""
+    return ft.Container(height=1, width=width, bgcolor=p["line"])
 
 
 def pointer_glow(color: str) -> ft.BoxShadow:

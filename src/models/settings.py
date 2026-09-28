@@ -1,4 +1,4 @@
-"""models.settings —— 持久化偏好（参考音 A4）
+"""models.settings —— 持久化偏好（参考音 A4、昵称、头像）
 
 和 models.state 的分工：state 是「运行时状态」（音符/是否在采集/主题名），
 这里只存「用户选过、下次还要记住」的东西，落一个 JSON 文件。
@@ -17,7 +17,7 @@ from pathlib import Path
 
 import flet as ft
 
-from core.constants import A4_STANDARD, SETTINGS_FILE
+from core.constants import A4_STANDARD, DEFAULT_AVATAR, DEFAULT_NICKNAME, NICKNAME_MAX, SETTINGS_FILE
 
 
 def _settings_dir() -> Path:
@@ -35,6 +35,8 @@ class SettingsState:
     """用户偏好（可观察：页面上改了立刻重渲染）"""
 
     a4: float = A4_STANDARD          # 参考音，440 为标准音高
+    nickname: str = DEFAULT_NICKNAME  # 「我的」页昵称
+    avatar: str = DEFAULT_AVATAR     # 头像（先是一枚 emoji，换图片是后续的事）
 
     def path(self) -> Path:
         """配置文件路径（第一次用到时才定下来，之后不再变）"""
@@ -53,19 +55,38 @@ class SettingsState:
         a4 = data.get("a4")
         if isinstance(a4, (int, float)) and 400 <= a4 <= 480:
             self.a4 = float(a4)
+        nickname = data.get("nickname")
+        if isinstance(nickname, str) and nickname.strip():
+            self.nickname = nickname.strip()[:NICKNAME_MAX]
+        avatar = data.get("avatar")
+        if isinstance(avatar, str) and avatar:
+            self.avatar = avatar
 
     def save(self):
         try:
             path = self.path()
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps({"a4": self.a4}, ensure_ascii=False, indent=2),
-                            encoding="utf-8")
+            path.write_text(
+                json.dumps({"a4": self.a4, "nickname": self.nickname, "avatar": self.avatar},
+                           ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
         except OSError:
             pass
 
     def set_a4(self, value: float):
         """换参考音：改状态（页面自动重渲染）+ 立即落盘"""
         self.a4 = float(value)
+        self.save()
+
+    def set_nickname(self, text: str):
+        """改昵称：空 / 全空白就退回默认，避免页面上出现空标题"""
+        name = (text or "").strip()[:NICKNAME_MAX]
+        self.nickname = name or DEFAULT_NICKNAME
+        self.save()
+
+    def set_avatar(self, emoji: str):
+        self.avatar = emoji or DEFAULT_AVATAR
         self.save()
 
     def is_standard_a4(self) -> bool:

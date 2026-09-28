@@ -6,7 +6,7 @@
 
 import flet as ft
 
-from app.theme import ACCENT, content_width, glass, palette_of
+from app.theme import ACCENT, content_width, palette_of
 from components.nav_dock import NAV_ITEMS
 from models.state import ThemeState, theme_state
 
@@ -25,21 +25,17 @@ def ChordsPage():
 def _Placeholder(index: int, theme: ThemeState):
     p = palette_of(theme.name)
     _route, label, icon, desc = NAV_ITEMS[index]
-    return ft.Container(
-        **glass(p, 28),
+    return ft.Column(
+        spacing=12,
+        tight=True,
         width=content_width(ft.context.page),
-        padding=ft.Padding.symmetric(vertical=44, horizontal=24),
-        content=ft.Column(
-            spacing=12,
-            tight=True,
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            controls=[
-                ft.Icon(icon, size=46, color=ACCENT),
-                ft.Text(f"{label}（开发中）", size=20,
-                        weight=ft.FontWeight.W_600, color=p["text"]),
-                ft.Text(desc, size=12, color=p["text_dim"]),
-                ft.Text("底部导航已经是真实路由：入口、切换、高亮都接好了，后续直接换实现",
-                        size=11, color=p["text_faint"], text_align=ft.TextAlign.CENTER),
-            ],
-        ),
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        controls=[
+            ft.Icon(icon, size=46, color=ACCENT),
+            ft.Text(f"{label}（开发中）", size=20,
+                    weight=ft.FontWeight.W_600, color=p["text"]),
+            ft.Text(desc, size=12, color=p["text_dim"]),
+            ft.Text("底部导航已经是真实路由：入口、切换、高亮都接好了，后续直接换实现",
+                    size=11, color=p["text_faint"], text_align=ft.TextAlign.CENTER),
+        ],
     )

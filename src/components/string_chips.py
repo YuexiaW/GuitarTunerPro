@@ -8,7 +8,7 @@
 
 import flet as ft
 
-from app.theme import ACCENT, CHIP_ROW_SPACING, chip_style, glass
+from app.theme import CHIP_ROW_SPACING, chip_style, selected_text
 
 CHIP_COL = 2                  # 12 格网格里占 2 格 = 1/6（6 个一行）
 
@@ -26,12 +26,8 @@ def string_chips(p: dict, strings: dict, *, active: str | None, on_pick,
 
 
 def _chip(p: dict, note: str, freq: float, selected: bool, on_pick) -> ft.Container:
-    # 玻璃给底色/描边/半径/投影，选中态只覆盖前三项（两个 dict 直接 ** 叠加会重复关键字）
-    style = glass(p, 18, soft=True)
-    style.update({k: v for k, v in chip_style(p, selected).items()
-                  if k in ("bgcolor", "border", "shadow")})
     return ft.Container(
-        **style,
+        **chip_style(p, selected),         # 平铺胶囊：未选中只描边，选中填淡绿
         col=CHIP_COL,                      # 宽度由网格算，不写死
         alignment=ft.Alignment(0, 0),
         padding=ft.Padding.symmetric(vertical=8, horizontal=4),
@@ -41,7 +37,7 @@ def _chip(p: dict, note: str, freq: float, selected: bool, on_pick) -> ft.Contai
         on_click=lambda e, n=note: on_pick(n),
         content=ft.Column(
             controls=[
-                ft.Text(note, size=15, color=ACCENT if selected else p["text_dim"],
+                ft.Text(note, size=15, color=selected_text(p, selected, p["text_dim"]),
                         weight=ft.FontWeight.W_600 if selected else ft.FontWeight.W_400),
                 ft.Text(f"{freq:.2f}", size=10,
                         color=p["text_dim"] if selected else p["text_faint"]),

@@ -22,6 +22,12 @@ DEFAULT_THEME = "dark"   # 启动主题："dark" / "light"
 A4_STANDARD = 440.0
 A4_OPTIONS = (440.0, 442.0, 435.0, 432.0, 415.0)
 
+# --- 个人资料（「我的」页头部）---
+DEFAULT_NICKNAME = "吉他手"
+NICKNAME_MAX = 12
+DEFAULT_AVATAR = "🎸"
+AVATAR_CHOICES = ("🎸", "🎵", "🎤", "🎧", "🥁", "🎹")
+
 # --- 设置文件 ---
 SETTINGS_FILE = "settings.json"
 
