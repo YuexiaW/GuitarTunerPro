@@ -2,6 +2,7 @@
 
 高度跟旁边那一列弦钮（`string_buttons.COLUMN_HEIGHT`）一致，
 所以左右旋钮与弦钮是同心的一排排，看着像「弦绕在旋钮上」。
+六根弦按真实弦径做粗细分档（6 弦最粗、1 弦最细），从左到右依次变细。
 """
 
 import flet as ft
@@ -12,8 +13,8 @@ BODY_WIDTH = 104          # 琴头体宽
 BODY_RADIUS = 18          # 下缘圆角（上缘做成半圆，像琴头顶端）
 PEG_SIZE = 14             # 旋钮直径
 PEG_OVERHANG = 7          # 旋钮探出琴头体外多少（看着像拧上去的）
-STRING_W = 1.5            # 琴弦线宽
-STRING_ROWS = 6           # 六根弦
+# 六根弦的线宽：6 弦（E2）最粗 → 1 弦（E4）最细，比例参考真实弦径
+STRING_WIDTHS = (2.8, 2.4, 2.0, 1.6, 1.2, 0.9)
 
 
 def headstock(p: dict, *, height: float, row_pitch: float, first_center: float,
@@ -38,10 +39,10 @@ def headstock(p: dict, *, height: float, row_pitch: float, first_center: float,
             spacing=0,
             alignment=ft.MainAxisAlignment.SPACE_EVENLY,
             controls=[
-                ft.Container(width=STRING_W, height=height - 46,
+                ft.Container(width=w, height=height - 46,
                              bgcolor=ft.Colors.with_opacity(0.38, ACCENT),
-                             border_radius=ft.BorderRadius.all(1))
-                for _ in range(STRING_ROWS)
+                             border_radius=ft.BorderRadius.all(w / 2))
+                for w in STRING_WIDTHS
             ],
         ),
     )
