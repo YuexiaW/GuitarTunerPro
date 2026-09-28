@@ -97,7 +97,6 @@ COL_FULL = {"xs": 12}
 COL_HALF = {"xs": 12, "md": 6}
 COL_WIDE = {"xs": 12, "md": 7, "lg": 8}
 COL_NARROW = {"xs": 12, "md": 5, "lg": 4}
-COL_STRING_BTN = {"xs": 4, "md": 2}            # 六弦圆钮：手机每行 3 个，≥768 一行 6 个
 
 # 背景光斑的几何（位置/大小固定，颜色与透明度跟着调色板走）
 BLOB_SPEC = [

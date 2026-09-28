@@ -1,12 +1,13 @@
-"""调音页：数字读数 → 音分刻度表盘 → 操作提示 → 六弦圆钮
+"""调音页：数字读数 → 音分刻度表盘 → 操作提示 → 「左三弦 | 琴头 | 右三弦」
 
 版式参考目标图：读数（音符/频率/音分）放大放在最上，下面接带刻度的横向表盘
-（基线 + 每 5 音分刻度 + 中央准音区胶囊 + 细竖线指针 + -50/0/+50 标注），
-再下面是操作提示与六个弦钮。内容平铺在渐变底上，不套卡片 —— 毛玻璃只属于底部导航条。
+（基线 + 每 5 音分刻度 + 中央固定容错区 + 细竖线指针 + -50/0/+50 标注），
+再下面是操作提示，最后是**固定两列弦钮夹着中间的琴头**。
+内容平铺在渐变底上，不套卡片 —— 毛玻璃只属于底部导航条。
 
 **整页响应式**：页面自己不写宽度 —— 返回 `ft.Container`（托一层）里放内容，
-表盘与弦钮排都是流体宽度，容器多宽就铺多宽（弦钮手机每行 3 个、宽屏一行 6 个）。
-全页没有一个写死的像素宽度，也没有固定中间那一条。
+表盘是流体宽度、刻度自带左右留白；弦钮+琴头那一组固定尺寸居中。
+全页没有一个写死的「容器宽度」。
 
 声明式：只读 pitch_state / tuner_state / settings_state，采集那边一改状态这里自己重渲染。
 （订阅靠参数：PitchPage 是零参入口，把 observable 传给内层 _Tuner。）
@@ -15,8 +16,9 @@
 import flet as ft
 
 from app.theme import ACCENT, BAD, palette_of
+from components.headstock import headstock
 from components.meter import cents_meter
-from components.string_buttons import string_row
+from components.string_buttons import BUTTON_PITCH, BUTTON_SIZE, COLUMN_HEIGHT, string_column
 from core.pitch import GUITAR_STRINGS, string_freqs
 from models.settings import SettingsState, settings_state
 from models.state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
@@ -24,6 +26,9 @@ from services.tuner import toggle_lock
 
 NOTES = tuple(GUITAR_STRINGS)                                      # 从第 6 弦到第 1 弦
 STRING_NO = {note: len(NOTES) - i for i, note in enumerate(NOTES)}  # E2 → 6 … E4 → 1
+LEFT_NOTES = NOTES[:3]                                             # 左列：6 / 5 / 4 弦
+RIGHT_NOTES = NOTES[3:]                                            # 右列：3 / 2 / 1 弦
+HEAD_GAP = 12                                                      # 弦钮列与琴头的间距
 
 
 @ft.component
@@ -66,10 +71,23 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
             readout,
             cents_meter(p, cents=pitch.cents, color=color),
             _prompt(p, pitch, has_pitch),
-            string_row(p, strings, STRING_NO, NOTES, active=active, on_pick=toggle_lock),
+            # 固定两列弦钮 + 中间琴头（高度对齐，旋钮与弦钮同心）
+            ft.Row(
+                spacing=HEAD_GAP,
+                tight=True,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
+                    string_column(p, strings, STRING_NO, LEFT_NOTES,
+                                  active=active, on_pick=toggle_lock),
+                    headstock(p, height=COLUMN_HEIGHT, row_pitch=BUTTON_PITCH,
+                              first_center=BUTTON_SIZE / 2),
+                    string_column(p, strings, STRING_NO, RIGHT_NOTES,
+                                  active=active, on_pick=toggle_lock),
+                ],
+            ),
         ],
     )
-    # 不自己算宽度：表盘与弦钮排本身就是流体宽度，Container 只托一层（alignment 让它撑满可用宽度）
+    # 不自己算宽度：表盘是流体宽度，Container 只托一层（alignment 让它撑满可用宽度）
     return ft.Container(alignment=ft.Alignment(0, 0), content=body)
 
 
