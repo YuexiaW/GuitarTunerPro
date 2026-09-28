@@ -80,7 +80,6 @@ CONTROL_PILL_BOTTOM = 72      # 按钮胶囊贴底偏移（叠在导航条上方
 METER_RANGE = 50.0            # 偏差条量程 ±50 音分
 METER_TICK_STEP = 5.0         # 刻度间隔（音分）
 METER_MAJOR_EVERY = 5         # 每几根出一个主刻度（5 × 5 = 25 音分一根长的）
-TUNER_CLUSTER_MAX = 720       # 调音页「弦钮 | 读数 | 弦钮」那一簇的宽度上限
 
 CONTENT_MAX_WIDTH = 1080      # 内容区上限：宽屏把宽度用起来，不缩成窄窄一条
 CONTENT_MIN_WIDTH = 280       # 内容区最窄宽度
@@ -97,6 +96,8 @@ COL_FULL = {"xs": 12}
 COL_HALF = {"xs": 12, "md": 6}
 COL_WIDE = {"xs": 12, "md": 7, "lg": 8}
 COL_NARROW = {"xs": 12, "md": 5, "lg": 4}
+COL_STRINGS = {"xs": 3, "md": 2, "lg": 2}      # 调音页两侧的弦钮列：手机 1/4，宽屏收窄成一条
+COL_READOUT = {"xs": 6, "md": 8, "lg": 8}      # 调音页中间读数：跟着容器撑满剩下的宽度
 
 # 背景光斑的几何（位置/大小固定，颜色与透明度跟着调色板走）
 BLOB_SPEC = [
