@@ -68,7 +68,7 @@ def _Shell(outlet: ft.Control, location: str, theme: ThemeState):
                             spacing=14,
                             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             controls=[
-                                ft.Container(height=16),
+                                ft.Container(height=8),      # 顶栏与内容之间留一点气口
                                 ft.AnimatedSwitcher(
                                     outlet,
                                     duration=300,

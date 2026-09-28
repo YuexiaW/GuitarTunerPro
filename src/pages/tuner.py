@@ -58,7 +58,9 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
         tight=True,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            ft.Text(pitch.note, size=104, weight=ft.FontWeight.BOLD, color=note_color),
+            # height 是行高倍数：大字号默认行距会在字上方留一大截，压紧一点离顶栏更近
+            ft.Text(pitch.note, size=104, height=0.92,
+                    weight=ft.FontWeight.BOLD, color=note_color),
             ft.Text(f"{pitch.freq:.1f} Hz" if has_pitch else "-- Hz",
                     size=24, color=p["text_dim"]),
             ft.Text(f"{pitch.cents:+.1f} 音分" if has_pitch else "0.0 音分",
@@ -93,8 +95,9 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
             capture_buttons(p, scale=scale, on_start=start_capture, on_stop=stop_capture),
         ],
     )
-    # 不自己算宽度：表盘是流体宽度，Container 只托一层（alignment 让它撑满可用宽度）
-    return ft.Container(alignment=ft.Alignment(0, 0), content=body)
+    # 不自己算宽度：表盘是流体宽度，Container 只托一层；
+    # 对齐用「顶部居中」—— 内容贴顶，别在可用高度里垂直居中（读数会离顶栏很远）
+    return ft.Container(alignment=ft.Alignment(0, -1), content=body)
 
 
 def _prompt(p: dict, pitch: PitchState, has_pitch: bool) -> ft.Column:

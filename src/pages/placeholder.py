@@ -38,5 +38,5 @@ def _Placeholder(index: int, theme: ThemeState):
                     size=11, color=p["text_faint"], text_align=ft.TextAlign.CENTER),
         ],
     )
-    # 不写宽度：Container 的 alignment 让它撑满可用宽度，内部文字照旧居中
-    return ft.Container(alignment=ft.Alignment(0, 0), content=body)
+    # 不写宽度：Container 的 alignment 让它撑满可用宽度，内部文字水平居中、贴顶
+    return ft.Container(alignment=ft.Alignment(0, -1), content=body)

@@ -86,8 +86,8 @@ def _Mine(theme: ThemeState, settings: SettingsState):
             ),
         ],
     )
-    # 不自己算宽度：ResponsiveRow 会把可用宽度分完，Container 只托一层（alignment 让它撑满）
-    return ft.Container(alignment=ft.Alignment(0, 0), content=body)
+    # 不自己算宽度：ResponsiveRow 会把可用宽度分完，Container 只托一层（贴顶居中）
+    return ft.Container(alignment=ft.Alignment(0, -1), content=body)
 
 
 # ============================================================
