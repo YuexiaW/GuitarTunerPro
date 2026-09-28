@@ -9,15 +9,15 @@ import flet as ft
 
 from app.theme import ACCENT
 
-BASE_HEIGHT = 46      # 基准按钮高（scale = 1.0 时）
-BASE_GAP = 12         # 两个按钮之间的基准间距
+BASE_HEIGHT = 38      # 基准按钮高（scale = 1.0 时，宽屏上限 1.2 → 45.6）
+BASE_GAP = 10         # 两个按钮之间的基准间距
 
 
 def capture_buttons(p: dict, *, scale: float, on_start, on_stop) -> ft.Row:
     """开始调音（主）/ 停止（次）；回调直接透传，Flet 自己会 await 异步回调"""
     height = BASE_HEIGHT * scale
-    radius = height * 0.44
-    text = height * 0.33
+    radius = height * 0.42
+    text = height * 0.32
 
     start = ft.Button(
         "开始调音",
@@ -28,7 +28,7 @@ def capture_buttons(p: dict, *, scale: float, on_start, on_stop) -> ft.Row:
             color="#04231A",
             bgcolor=ACCENT,
             shape=ft.RoundedRectangleBorder(radius=radius),
-            padding=ft.Padding.symmetric(horizontal=height * 0.5),
+            padding=ft.Padding.symmetric(horizontal=height * 0.42),
             text_style=ft.TextStyle(size=text, weight=ft.FontWeight.W_600),
         ),
     )
@@ -41,7 +41,7 @@ def capture_buttons(p: dict, *, scale: float, on_start, on_stop) -> ft.Row:
             color=p["stop_fg"],
             bgcolor=p["stop_bg"],
             shape=ft.RoundedRectangleBorder(radius=radius),
-            padding=ft.Padding.symmetric(horizontal=height * 0.4),
+            padding=ft.Padding.symmetric(horizontal=height * 0.36),
             text_style=ft.TextStyle(size=text),
         ),
     )
