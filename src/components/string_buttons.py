@@ -33,7 +33,7 @@ def column_height(scale: float) -> float:
 
 def string_button(p: dict, note: str, number: int, *, size: float, freq: float,
                   selected: bool, on_pick) -> ft.Container:
-    """一个圆钮：上行弦号、下行音名；选中 = 淡绿底 + 绿描边 + 绿字"""
+    """一个圆钮：上大行弦号、下小行音名（E2/A2/D3/G3/B3/E4）；选中 = 淡绿底 + 绿描边 + 绿字"""
     return ft.Container(
         width=size,
         height=size,
@@ -49,10 +49,12 @@ def string_button(p: dict, note: str, number: int, *, size: float, freq: float,
             tight=True,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
             controls=[
-                ft.Text(str(number), size=size * 0.37,
-                        weight=ft.FontWeight.W_600 if selected else ft.FontWeight.W_400,
+                ft.Text(str(number), size=size * 0.38, no_wrap=True,
+                        weight=ft.FontWeight.W_600 if selected else ft.FontWeight.W_500,
                         color=selected_text(p, selected)),
-                ft.Text(note, size=size * 0.20,
+                # 音名：够醒目的字号 + 选中时用主色，未选中也别做成灰到底的小字
+                ft.Text(note, size=size * 0.26, no_wrap=True,
+                        weight=ft.FontWeight.W_600 if selected else ft.FontWeight.W_500,
                         color=selected_text(p, selected, p["text_dim"])),
             ],
         ),
