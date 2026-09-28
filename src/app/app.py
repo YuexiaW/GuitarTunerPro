@@ -55,7 +55,7 @@ def main(page: ft.Page):
 
     attach(page, on_message=show_message)
     page.render_views(App)               # manage_views=True 必须用 render_views
-    settings_state.load(page)            # 读取上次的偏好（参考音 A4）；读不到就用默认值
+    settings_state.load()                # 读取上次的偏好（参考音 A4）；读不到就用默认值
 
     # 本地调试：TUNER_AUTOSTART=1 启动后自动开麦
     if os.environ.get("TUNER_AUTOSTART"):
