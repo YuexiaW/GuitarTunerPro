@@ -94,8 +94,8 @@ def _Mine(theme: ThemeState, settings: SettingsState):
 # ============================================================
 def _identity(p: dict, settings: SettingsState, page) -> ft.Row:
     ring = ft.Container(
-        width=88, height=88,
-        border_radius=ft.BorderRadius.all(44),
+        width=64, height=64,
+        border_radius=ft.BorderRadius.all(32),
         gradient=ft.LinearGradient(
             begin=ft.Alignment.TOP_LEFT, end=ft.Alignment.BOTTOM_RIGHT,
             colors=[ACCENT, "#0EA5E9"],
@@ -106,9 +106,9 @@ def _identity(p: dict, settings: SettingsState, page) -> ft.Row:
         on_click=lambda e: _pick_avatar(page, p, settings),
         content=ft.Container(
             bgcolor=p["avatar_bg"],
-            border_radius=ft.BorderRadius.all(41),
+            border_radius=ft.BorderRadius.all(29),
             alignment=ft.Alignment(0, 0),
-            content=ft.Text(settings.avatar, size=36),
+            content=ft.Text(settings.avatar, size=26),
         ),
     )
     return ft.Row(
