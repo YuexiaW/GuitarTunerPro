@@ -1,12 +1,12 @@
-"""调音页：音分表盘 → 操作提示 → 「左三弦 | 读数 | 右三弦」
+"""调音页：数字读数 → 音分刻度表盘 → 操作提示 → 六弦圆钮
 
-版式参考目标图：表盘在最上（带刻度与 -50/+50 标注），中间是提示文字，
-下面六个弦钮分两列夹住中间读数（不再是一排横胶囊）。
-内容平铺在渐变底上，不套卡片 —— 毛玻璃只属于底部导航条（见 app/theme.py）。
+版式参考目标图：读数（音符/频率/音分）放大放在最上，下面接带刻度的横向表盘
+（基线 + 每 5 音分刻度 + 中央准音区胶囊 + 细竖线指针 + -50/0/+50 标注），
+再下面是操作提示与六个弦钮。内容平铺在渐变底上，不套卡片 —— 毛玻璃只属于底部导航条。
 
 **整页响应式**：页面自己不写宽度 —— 返回 `ft.Container`（托一层）里放内容，
-表盘与弦钮簇都是流体宽度，容器多宽就铺多宽；三块的分栏用 ResponsiveRow 的 col 断点
-（手机 3/6/3，宽屏 2/8/2）。全页没有一个写死的像素宽度，也没有固定中间那一条。
+表盘与弦钮排都是流体宽度，容器多宽就铺多宽（弦钮手机每行 3 个、宽屏一行 6 个）。
+全页没有一个写死的像素宽度，也没有固定中间那一条。
 
 声明式：只读 pitch_state / tuner_state / settings_state，采集那边一改状态这里自己重渲染。
 （订阅靠参数：PitchPage 是零参入口，把 observable 传给内层 _Tuner。）
@@ -14,9 +14,9 @@
 
 import flet as ft
 
-from app.theme import ACCENT, BAD, COL_READOUT, COL_STRINGS, palette_of
+from app.theme import ACCENT, BAD, palette_of
 from components.meter import cents_meter
-from components.string_buttons import string_column
+from components.string_buttons import string_row
 from core.pitch import GUITAR_STRINGS, string_freqs
 from models.settings import SettingsState, settings_state
 from models.state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
@@ -24,8 +24,6 @@ from services.tuner import toggle_lock
 
 NOTES = tuple(GUITAR_STRINGS)                                      # 从第 6 弦到第 1 弦
 STRING_NO = {note: len(NOTES) - i for i, note in enumerate(NOTES)}  # E2 → 6 … E4 → 1
-LEFT_NOTES = NOTES[:3]                                             # 左列：6 / 5 / 4 弦
-RIGHT_NOTES = NOTES[3:]                                            # 右列：3 / 2 / 1 弦
 
 
 @ft.component
@@ -46,45 +44,32 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
     note_color = color if has_pitch else p["text_faint"]
     cents_color = color if has_pitch else p["text_faint"]
 
+    # 数字读数放大，放在刻度表盘的上面（先看数、再对照刻度）
     readout = ft.Column(
-        spacing=2,
+        spacing=0,
         tight=True,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            ft.Text(pitch.note, size=76, weight=ft.FontWeight.BOLD, color=note_color),
+            ft.Text(pitch.note, size=104, weight=ft.FontWeight.BOLD, color=note_color),
             ft.Text(f"{pitch.freq:.1f} Hz" if has_pitch else "-- Hz",
-                    size=15, color=p["text_dim"]),
+                    size=24, color=p["text_dim"]),
             ft.Text(f"{pitch.cents:+.1f} 音分" if has_pitch else "0.0 音分",
-                    size=13, color=cents_color),
-        ],
-    )
-
-    cluster = ft.ResponsiveRow(
-        spacing=24,
-        run_spacing=24,
-        vertical_alignment=ft.CrossAxisAlignment.CENTER,
-        controls=[
-            ft.Container(col=COL_STRINGS, alignment=ft.Alignment(0, 0),
-                         content=string_column(p, strings, STRING_NO, LEFT_NOTES,
-                                               active=active, on_pick=toggle_lock)),
-            ft.Container(col=COL_READOUT, alignment=ft.Alignment(0, 0), content=readout),
-            ft.Container(col=COL_STRINGS, alignment=ft.Alignment(0, 0),
-                         content=string_column(p, strings, STRING_NO, RIGHT_NOTES,
-                                               active=active, on_pick=toggle_lock)),
+                    size=17, color=cents_color),
         ],
     )
 
     body = ft.Column(
-        spacing=24,
+        spacing=20,
         tight=True,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
+            readout,
             cents_meter(p, cents=pitch.cents, color=color),
             _prompt(p, pitch, has_pitch),
-            cluster,
+            string_row(p, strings, STRING_NO, NOTES, active=active, on_pick=toggle_lock),
         ],
     )
-    # 不自己算宽度：表盘与弦钮簇本身就是流体宽度，Container 只托一层（alignment 让它撑满可用宽度）
+    # 不自己算宽度：表盘与弦钮排本身就是流体宽度，Container 只托一层（alignment 让它撑满可用宽度）
     return ft.Container(alignment=ft.Alignment(0, 0), content=body)
 
 

@@ -1,15 +1,15 @@
-"""六弦圆钮（两列夹住中间读数）：弦号 + 音名，点一下锁定该弦、再点取消
+"""六弦圆钮：弦号 + 音名，点一下锁定该弦、再点取消
 
-版式参考目标图：不再做一排横胶囊，改成左侧 6/5/4、右侧 3/2/1 两列圆钮，中间留给读数。
+一排六个（手机每行 3 个、宽屏一行 6 个），跟着容器把宽度铺满；
+读数已经挪到页面顶部，这里就只管弦钮本身。
 未锁定时高亮自动识别到的那根弦（规则在 services/tuner.py，这里只负责画）。
 """
 
 import flet as ft
 
-from app.theme import chip_style, selected_text
+from app.theme import COL_STRING_BTN, chip_style, selected_text
 
 BUTTON_SIZE = 46        # 圆钮直径（固定尺寸：圆形按钮不吃网格宽度）
-COLUMN_SPACING = 8      # 同列相邻圆钮的间距
 
 
 def string_button(p: dict, note: str, number: int, *, freq: float, selected: bool,
@@ -39,16 +39,20 @@ def string_button(p: dict, note: str, number: int, *, freq: float, selected: boo
     )
 
 
-def string_column(p: dict, strings: dict, numbers: dict, notes: tuple, *,
-                  active: str | None, on_pick) -> ft.Column:
-    """一列圆钮；notes 是这一列从上到下的音名顺序"""
-    return ft.Column(
-        spacing=COLUMN_SPACING,
-        tight=True,
-        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+def string_row(p: dict, strings: dict, numbers: dict, notes: tuple, *,
+               active: str | None, on_pick) -> ft.ResponsiveRow:
+    """一排弦钮（notes 是这一排从左到右的音名顺序），按断点自动每行几个"""
+    return ft.ResponsiveRow(
+        spacing=8,
+        run_spacing=10,
+        vertical_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            string_button(p, note, numbers[note], freq=strings[note],
-                          selected=note == active, on_pick=on_pick)
+            ft.Container(
+                col=COL_STRING_BTN,
+                alignment=ft.Alignment(0, 0),
+                content=string_button(p, note, numbers[note], freq=strings[note],
+                                      selected=note == active, on_pick=on_pick),
+            )
             for note in notes
         ],
     )
