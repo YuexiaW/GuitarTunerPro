@@ -38,7 +38,6 @@ PALETTES = {
         line=ft.Colors.with_opacity(0.12, _WHITE),          # 分隔细线
         avatar_bg=ft.Colors.with_opacity(0.30, _BLACK),      # 头像内圈（平铺，不模糊）
         track_bg=ft.Colors.with_opacity(0.16, _WHITE),      # 偏差条轨道
-        tick=ft.Colors.with_opacity(0.75, _WHITE),          # 正中刻度
         stop_bg=ft.Colors.with_opacity(0.18, _WHITE),
         stop_fg=_WHITE,
     ),
@@ -63,7 +62,6 @@ PALETTES = {
         line=ft.Colors.with_opacity(0.12, _BLACK),
         avatar_bg=ft.Colors.with_opacity(0.55, _WHITE),
         track_bg=ft.Colors.with_opacity(0.10, _BLACK),
-        tick=ft.Colors.with_opacity(0.55, _BLACK),
         stop_bg=ft.Colors.with_opacity(0.06, _BLACK),
         stop_fg="#1A1A1A",
     ),
@@ -76,15 +74,23 @@ BOTTOM_RESERVE = 200          # 底部悬浮层预留高度：内容滚到底不
 CONTROL_PILL_BOTTOM = 72      # 按钮胶囊贴底偏移（叠在导航条上方，随导航条高度收小）
 
 METER_RANGE = 50.0            # 偏差条量程 ±50 音分
-METER_WIDTH = 320             # 偏差条轨道宽度
-METER_POINTER_TRAVEL = 5.5    # 指针位移上限（以自身宽度为单位 → ±50 音分 ≈ ±132px）
 
-CONTENT_MAX_WIDTH = 520       # 内容卡片最大宽度（宽窗口下居中限宽，避免横着拉满整屏）
-CONTENT_MIN_WIDTH = 280       # 卡片最窄宽度
-WINDOW_GUTTER = 40            # 卡片两侧留白
+CONTENT_MAX_WIDTH = 1080      # 内容区上限：宽屏把宽度用起来，不缩成窄窄一条
+CONTENT_MIN_WIDTH = 280       # 内容区最窄宽度
+WINDOW_GUTTER = 40            # 宽屏时内容两侧留白
+WINDOW_GUTTER_SMALL = 24      # 窄屏（<600）时留白收窄，别浪费手机宽度
+
+BAR_MAX_WIDTH = 560           # 底部悬浮条上限：导航条不跟着大屏拉满
 
 CHIP_ROW_SPACING = 6          # 六弦条的列间距（ResponsiveRow 的 spacing，按 col 自动分宽度）
 BOTTOM_BAR_MARGIN = 12        # 底部悬浮条左右安全边距
+
+# 断点别名（ResponsiveRow 的 col 用；手机单列、平板/桌面分栏都靠它）
+COL_FULL = {"xs": 12}
+COL_HALF = {"xs": 12, "md": 6}
+COL_WIDE = {"xs": 12, "md": 7, "lg": 8}
+COL_NARROW = {"xs": 12, "md": 5, "lg": 4}
+COL_PHONE_3 = {"xs": 4, "sm": 2}      # 手机上每行 3 个，≥576 每行 6 个
 
 # 背景光斑的几何（位置/大小固定，颜色与透明度跟着调色板走）
 BLOB_SPEC = [
@@ -192,11 +198,16 @@ def window_width(page) -> float:
 
 
 def content_width(page) -> float:
-    """内容宽度上限：min(上限, 窗口宽 - 两侧留白) —— 只做「宽屏别拉满」的约束，
-    窄屏下横向自适应交给 ResponsiveRow 的 col 分配，不在这里算每个控件的宽度"""
-    return max(CONTENT_MIN_WIDTH, min(CONTENT_MAX_WIDTH, window_width(page) - WINDOW_GUTTER))
+    """内容区宽度：窗口宽 - 两侧留白（窄屏留白收窄），上限 CONTENT_MAX_WIDTH。
+
+    这里只决定「容器多宽」；页面内部按 ResponsiveRow 断点回流（手机单列、宽屏分栏），
+    所以大屏是把宽度用起来，不是缩成中间一条。
+    """
+    avail = window_width(page)
+    gutter = WINDOW_GUTTER if avail >= 600 else WINDOW_GUTTER_SMALL
+    return max(CONTENT_MIN_WIDTH, min(CONTENT_MAX_WIDTH, avail - gutter))
 
 
 def bottom_bar_width(page) -> float:
-    """底部悬浮条宽度：不超过内容上限，也不超过窗口（给窄屏留出安全区左右各 12）"""
-    return min(content_width(page), window_width(page) - 24)
+    """底部悬浮条宽度：导航条不跟着大屏拉满（上限 BAR_MAX_WIDTH），窄屏随窗口"""
+    return min(BAR_MAX_WIDTH, content_width(page), window_width(page) - 24)

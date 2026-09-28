@@ -9,7 +9,7 @@
 
 import flet as ft
 
-from app.theme import ACCENT, BAD, content_width, palette_of
+from app.theme import ACCENT, BAD, COL_NARROW, COL_WIDE, content_width, palette_of
 from components.meter import cents_meter
 from components.string_chips import string_chips
 from core.pitch import string_freqs
@@ -66,15 +66,23 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState, settings: Se
     )
 
     return ft.Column(
-        spacing=28,
+        spacing=24,
         tight=True,
         width=card_w,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
             string_chips(p, string_freqs(settings.a4), active=tuner.active_string(),
                          on_pick=toggle_lock, width=card_w),
-            note,
-            meter,
+            # 手机（<768）上下堆叠，平板/桌面（≥768）音符与偏差条并排，把宽度用起来
+            ft.ResponsiveRow(
+                spacing=24,
+                run_spacing=24,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
+                    ft.Container(col=COL_NARROW, alignment=ft.Alignment(0, 0), content=note),
+                    ft.Container(col=COL_WIDE, content=meter),
+                ],
+            ),
             ft.Text(HINT_TEXT, size=11, color=p["text_faint"], text_align=ft.TextAlign.CENTER),
         ],
     )

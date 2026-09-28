@@ -2,15 +2,14 @@
 
 未锁定时高亮自动识别到的那根弦；高亮规则在 services/tuner.py，这里只负责画。
 
-响应式做法：胶囊不写死宽度，用 ResponsiveRow 的 12 格网格 —— 每个占 2 格（1/6），
-6 个正好一行；窗口再窄也各占 1/6，不会顶出屏幕被裁。`width` 只用来限上限（宽屏别拉满）。
+响应式做法：胶囊不写死宽度，用 ResponsiveRow 的 12 格网格 + 断点 ——
+手机（xs）每个占 4 格（一行 3 个、两行放完），≥576 每个占 2 格（一行 6 个）。
+`width` 只用来限上限（宽屏别拉满）。
 """
 
 import flet as ft
 
-from app.theme import CHIP_ROW_SPACING, chip_style, selected_text
-
-CHIP_COL = 2                  # 12 格网格里占 2 格 = 1/6（6 个一行）
+from app.theme import CHIP_ROW_SPACING, COL_PHONE_3, chip_style, selected_text
 
 
 def string_chips(p: dict, strings: dict, *, active: str | None, on_pick,
@@ -28,7 +27,7 @@ def string_chips(p: dict, strings: dict, *, active: str | None, on_pick,
 def _chip(p: dict, note: str, freq: float, selected: bool, on_pick) -> ft.Container:
     return ft.Container(
         **chip_style(p, selected),         # 平铺胶囊：未选中只描边，选中填淡绿
-        col=CHIP_COL,                      # 宽度由网格算，不写死
+        col=COL_PHONE_3,                   # 断点：手机每行 3 个，≥576 每行 6 个
         alignment=ft.Alignment(0, 0),
         padding=ft.Padding.symmetric(vertical=8, horizontal=4),
         animate=ft.Animation(220, ft.AnimationCurve.EASE_OUT),

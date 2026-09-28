@@ -11,6 +11,7 @@ import flet as ft
 from app.theme import (
     ACCENT,
     CHIP_ROW_SPACING,
+    COL_HALF,
     chip_style,
     content_width,
     hairline,
@@ -54,9 +55,16 @@ def _Mine(theme: ThemeState, settings: SettingsState):
         controls=[
             _profile(p, settings, page),
             hairline(p, col_w),
-            _prefs(p, settings),
-            hairline(p, col_w),
-            _about(p, page),
+            # 手机（<768）单列，平板/桌面（≥768）调音偏好与关于并排
+            ft.ResponsiveRow(
+                spacing=24,
+                run_spacing=24,
+                vertical_alignment=ft.CrossAxisAlignment.START,
+                controls=[
+                    ft.Container(col=COL_HALF, content=_prefs(p, settings)),
+                    ft.Container(col=COL_HALF, content=_about(p, page)),
+                ],
+            ),
         ],
     )
 
