@@ -70,7 +70,9 @@ def _Mine(theme: ThemeState, settings: SettingsState):
                     ft.Container(col=COL_NARROW, content=ft.Column(
                         spacing=16, tight=True,
                         controls=[
-                            _identity(p, settings, page),
+                            # 左让 16px：和下面卡片里的图标对齐，别贴着内容区左边缘
+                            ft.Container(padding=ft.Padding.only(left=16),
+                                         content=_identity(p, settings, page)),
                             _stats(p, settings),
                             _cta(p, page),
                         ],
