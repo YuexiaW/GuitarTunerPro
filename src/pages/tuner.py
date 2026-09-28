@@ -6,8 +6,9 @@
 内容平铺在渐变底上，不套卡片 —— 毛玻璃只属于底部导航条。
 
 **整页响应式**：页面自己不写宽度 —— 返回 `ft.Container`（托一层）里放内容，
-表盘是流体宽度、刻度自带左右留白；弦钮+琴头那一组固定尺寸居中。
-全页没有一个写死的「容器宽度」。
+表盘是流体宽度、刻度自带左右留白；弦钮与琴头由同一套尺寸函数按 `control_scale(page)` 缩放
+（手机竖屏 ≈1.0、宽屏上限 1.2），圆钮、琴头、字号、间距一起变。
+全页没有一个写死的「容器宽度」，也没有固定中间那一条。
 
 声明式：只读 pitch_state / tuner_state / settings_state，采集那边一改状态这里自己重渲染。
 （订阅靠参数：PitchPage 是零参入口，把 observable 传给内层 _Tuner。）
@@ -15,10 +16,10 @@
 
 import flet as ft
 
-from app.theme import ACCENT, BAD, palette_of
+from app.theme import ACCENT, BAD, control_scale, palette_of
 from components.headstock import headstock
 from components.meter import cents_meter
-from components.string_buttons import BUTTON_PITCH, BUTTON_SIZE, COLUMN_HEIGHT, string_column
+from components.string_buttons import button_pitch, button_size, column_height, string_column
 from core.pitch import GUITAR_STRINGS, string_freqs
 from models.settings import SettingsState, settings_state
 from models.state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
@@ -28,7 +29,7 @@ NOTES = tuple(GUITAR_STRINGS)                                      # 从第 6 �
 STRING_NO = {note: len(NOTES) - i for i, note in enumerate(NOTES)}  # E2 → 6 … E4 → 1
 LEFT_NOTES = NOTES[:3]                                             # 左列：6 / 5 / 4 弦
 RIGHT_NOTES = NOTES[3:]                                            # 右列：3 / 2 / 1 弦
-HEAD_GAP = 12                                                      # 弦钮列与琴头的间距
+BASE_HEAD_GAP = 12                                                 # 弦钮列与琴头的基准间距（乘 scale）
 
 
 @ft.component
@@ -41,6 +42,7 @@ def PitchPage():
 def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
            settings: SettingsState):
     p = palette_of(theme.name)              # 读参数里的 observable = 订阅
+    scale = control_scale(ft.context.page)  # 弦钮/琴头随内容区宽度缩放（带上下限）
     strings = string_freqs(settings.a4)
     active = tuner.active_string()
 
@@ -71,17 +73,18 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
             readout,
             cents_meter(p, cents=pitch.cents, color=color),
             _prompt(p, pitch, has_pitch),
-            # 固定两列弦钮 + 中间琴头（高度对齐，旋钮与弦钮同心）
+            # 固定两列弦钮 + 中间琴头（尺寸都由 scale 推导，随窗口缩放）
             ft.Row(
-                spacing=HEAD_GAP,
+                spacing=BASE_HEAD_GAP * scale,
                 tight=True,
                 vertical_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    string_column(p, strings, STRING_NO, LEFT_NOTES,
+                    string_column(p, strings, STRING_NO, LEFT_NOTES, scale=scale,
                                   active=active, on_pick=toggle_lock),
-                    headstock(p, height=COLUMN_HEIGHT, row_pitch=BUTTON_PITCH,
-                              first_center=BUTTON_SIZE / 2),
-                    string_column(p, strings, STRING_NO, RIGHT_NOTES,
+                    headstock(p, height=column_height(scale),
+                              row_pitch=button_pitch(scale),
+                              first_center=button_size(scale) / 2),
+                    string_column(p, strings, STRING_NO, RIGHT_NOTES, scale=scale,
                                   active=active, on_pick=toggle_lock),
                 ],
             ),

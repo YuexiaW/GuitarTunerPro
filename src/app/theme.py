@@ -87,6 +87,11 @@ CONTENT_MIN_WIDTH = 280       # 内容区最窄宽度
 WINDOW_GUTTER = 40            # 宽屏时内容两侧留白
 WINDOW_GUTTER_SMALL = 24      # 窄屏（<600）时留白收窄，别浪费手机宽度
 
+# 控件缩放：手机竖屏宽度算 1.0，内容区越宽控件越大（带上下限，别在手机上缩太小、大屏上撑太大）
+CONTROL_REF_WIDTH = 420       # 基准内容宽
+CONTROL_SCALE_MIN = 0.85
+CONTROL_SCALE_MAX = 1.2
+
 BAR_MAX_WIDTH = 560           # 底部悬浮条上限：导航条不跟着大屏拉满
 
 CHIP_ROW_SPACING = 6          # 对话框里候选块（头像/参考音）的网格间距
@@ -225,6 +230,16 @@ def content_width(page) -> float:
     avail = window_width(page)
     gutter = WINDOW_GUTTER if avail >= 600 else WINDOW_GUTTER_SMALL
     return max(CONTENT_MIN_WIDTH, min(CONTENT_MAX_WIDTH, avail - gutter))
+
+
+def control_scale(page) -> float:
+    """控件缩放系数：内容区越宽，弦钮/琴头这类固定形状的控件按比例放大（有上下限）
+
+    Flet 没有百分比宽度，圆形/图形控件只能给具体 px；所以尺寸统一写成
+    「基础尺寸 × 这个系数」，而不是各处写死像素 —— 手机上不挤、大屏上不显小。
+    """
+    ratio = content_width(page) / CONTROL_REF_WIDTH
+    return max(CONTROL_SCALE_MIN, min(CONTROL_SCALE_MAX, ratio))
 
 
 def bottom_bar_width(page) -> float:
