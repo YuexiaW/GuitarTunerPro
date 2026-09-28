@@ -9,10 +9,10 @@ import tempfile
 # --- 应用信息 ---
 APP_TITLE = "🎸 吉他调音器"
 APP_NAME = "吉他调音器"
-APP_VERSION = "0.1.2"                     # 跟 tag/pyproject 对齐
+APP_VERSION = "0.1.3"                     # 跟 tag/pyproject 对齐
 APP_REPO = "https://github.com/YuexiaW/GuitarTunerPro"
 HELP_TEXT = ("拨动单根弦、靠近麦克风；指针停在中间绿区（±5 音分）就是准了。"
-             "点内容区那排弦名可锁定该弦。")
+             "自动识别模式不用选弦；点内容区那排弦钮可认准一根弦（切到精准识别）。")
 
 # --- 调音判定 ---
 IN_TUNE_CENTS = 5.0      # 「准了」绿区 ±5 音分（检测与偏差条共用）

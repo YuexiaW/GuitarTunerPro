@@ -44,11 +44,29 @@ jobs:
         shell: bash
         run: uv sync --locked
 
-      - name: Build APK
+      - name: Resolve build version
+        # tag 触发（push v*）拿 tag 当版本号；workflow_dispatch 用输入值；都没有则退回 pyproject.toml
+        # （不写这一步的话，tag 构建出来的 APK 版本号永远是 pyproject 里那个，装机会撞版本）
         shell: bash
         env:
-          BUILD_VERSION: ${{ inputs.build_version }}
-          BUILD_NUMBER: ${{ inputs.build_number }}
+          INPUT_VERSION: ${{ inputs.build_version }}
+          INPUT_NUMBER: ${{ inputs.build_number }}
+        run: |
+          set -euo pipefail
+          version="${INPUT_VERSION:-}"
+          if [ -z "$version" ] && [ "${GITHUB_REF_TYPE:-}" = "tag" ]; then
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          if [ -z "$version" ]; then
+            version="$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)"
+          fi
+          number="${INPUT_NUMBER:-$GITHUB_RUN_NUMBER}"
+          echo "BUILD_VERSION=$version" >> "$GITHUB_ENV"
+          echo "BUILD_NUMBER=$number" >> "$GITHUB_ENV"
+          echo "本次构建：版本 $version / 构建号 $number"
+
+      - name: Build APK
+        shell: bash
         run: |
           set -euo pipefail
           args=(--yes --verbose)
