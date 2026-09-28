@@ -58,13 +58,12 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
         tight=True,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            # height 是行高倍数：大字号默认行距会在字上方留一大截，压紧一点离顶栏更近
-            ft.Text(pitch.note, size=104, height=0.92,
-                    weight=ft.FontWeight.BOLD, color=note_color),
+            # 大音符：行高用默认（height=0.92 压紧那版看着憋，不好看）
+            ft.Text(pitch.note, size=118, weight=ft.FontWeight.BOLD, color=note_color),
             ft.Text(f"{pitch.freq:.1f} Hz" if has_pitch else "-- Hz",
-                    size=24, color=p["text_dim"]),
+                    size=26, color=p["text_dim"]),
             ft.Text(f"{pitch.cents:+.1f} 音分" if has_pitch else "0.0 音分",
-                    size=17, color=cents_color),
+                    size=18, color=cents_color),
         ],
     )
 
