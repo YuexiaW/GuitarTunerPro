@@ -1,7 +1,9 @@
-"""占位页（节拍器 / 和弦）
+"""占位页（节拍器 / 歌谱）
 
 路由、切换、高亮都是真的，页内功能后续换成真实实现：把对应组件替换即可。
 （订阅靠参数：零参入口 → 把 theme_state 传给内层 _Placeholder。）
+
+页内文案、图标、说明都从 nav_dock.NAV_ITEMS 按下标取，改导航条那一处这里跟着变。
 """
 
 import flet as ft
@@ -17,7 +19,7 @@ def MetronomePage():
 
 
 @ft.component
-def ChordsPage():
+def SongsPage():
     return _Placeholder(2, theme_state)
 
 

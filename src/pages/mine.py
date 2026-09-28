@@ -216,7 +216,7 @@ def _cta(p: dict, page) -> ft.Container:
 def _shortcuts(p: dict, settings: SettingsState, page) -> ft.Container:
     cells = [
         _shortcut(p, label, icon, lambda e, r=route: go(page, r, page.route))
-        for route, label, icon, _desc in NAV_ITEMS[:3]      # 调音 / 节拍器 / 和弦
+        for route, label, icon, _desc in NAV_ITEMS[:3]      # 调音 / 节拍器 / 歌谱
     ]
     cells.append(_shortcut(p, "参考音", ft.Icons.GRAPHIC_EQ_ROUNDED,
                            lambda e: _pick_a4(page, p, settings)))

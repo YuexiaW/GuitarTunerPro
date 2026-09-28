@@ -15,7 +15,7 @@ from app.theme import ACCENT, glass, item_style
 NAV_ITEMS = [
     ("/", "调音", ft.Icons.TUNE_ROUNDED, "实时音高检测"),
     ("/metronome", "节拍器", ft.Icons.TIMER_ROUNDED, "速度与拍号训练"),
-    ("/chords", "和弦", ft.Icons.LIBRARY_MUSIC_ROUNDED, "和弦指法查询"),
+    ("/songs", "歌谱", ft.Icons.MENU_BOOK_ROUNDED, "歌谱浏览，边弹边跟"),
     ("/mine", "我的", ft.Icons.PERSON_ROUNDED, "个人中心与调音偏好"),
 ]
 

@@ -4,7 +4,7 @@ Router manage_views=True（View 由 Layout 产出，支持系统返回手势与 
 底部导航切换 = 同级路由，路径如下：
     /            调音（PitchPage）
     /metronome   节拍器（占位）
-    /chords      和弦（占位）
+    /songs       歌谱（占位）
     /mine        我的
 """
 
@@ -18,7 +18,7 @@ from components.app_bar import apply_theme
 from core.constants import APP_TITLE
 from models.settings import settings_state
 from pages.mine import MinePage
-from pages.placeholder import ChordsPage, MetronomePage
+from pages.placeholder import MetronomePage, SongsPage
 from pages.tuner import PitchPage
 from services.tuner import attach, start_capture
 
@@ -33,7 +33,7 @@ def App():
                 children=[
                     ft.Route(index=True, component=PitchPage),        # "/"
                     ft.Route(path="metronome", component=MetronomePage),
-                    ft.Route(path="chords", component=ChordsPage),
+                    ft.Route(path="songs", component=SongsPage),
                     ft.Route(path="mine", component=MinePage),
                 ],
             ),
