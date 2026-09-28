@@ -38,7 +38,9 @@ def set_mode(mode: str):
     所以切过去时给一个：优先用上一次识别到的弦，还没识别过就先拿 6 弦 E2。
     """
     if mode == MODE_PRECISE:
-        tuner_state.locked = tuner_state.locked or tuner_state.detected or GUITAR_STRINGS[0]
+        # GUITAR_STRINGS 是「弦名 → 频率」的表，第一个键就是 6 弦 E2
+        tuner_state.locked = (tuner_state.locked or tuner_state.detected
+                              or next(iter(GUITAR_STRINGS)))
     else:
         tuner_state.locked = None       # 回自动模式：清掉指定弦，识别结果重新接管
     tuner_state.mode = mode
