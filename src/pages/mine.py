@@ -18,7 +18,6 @@ from app.theme import (
     COL_WIDE,
     card,
     chip_style,
-    content_width,
     hairline,
     palette_of,
     selected_text,
@@ -54,12 +53,10 @@ def MinePage():
 def _Mine(theme: ThemeState, settings: SettingsState):
     p = palette_of(theme.name)
     page = ft.context.page
-    col_w = content_width(page)
 
-    return ft.Column(
+    body = ft.Column(
         spacing=16,
         tight=True,
-        width=col_w,
         horizontal_alignment=ft.CrossAxisAlignment.START,
         controls=[
             ft.ResponsiveRow(
@@ -89,6 +86,8 @@ def _Mine(theme: ThemeState, settings: SettingsState):
             ),
         ],
     )
+    # 不自己算宽度：ResponsiveRow 会把可用宽度分完，Container 只托一层（alignment 让它撑满）
+    return ft.Container(alignment=ft.Alignment(0, 0), content=body)
 
 
 # ============================================================

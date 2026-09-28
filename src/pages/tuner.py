@@ -4,9 +4,9 @@
 下面六个弦钮分两列夹住中间读数（不再是一排横胶囊）。
 内容平铺在渐变底上，不套卡片 —— 毛玻璃只属于底部导航条（见 app/theme.py）。
 
-**整页响应式**：容器宽度 = content_width(窗口)（宽屏用满、不缩在中间），
-三块用 ResponsiveRow 的 col 断点分宽度（手机 3/6/3，宽屏 2/8/2），
-表盘本身也是流体宽度 —— 任何窗口尺寸都自己铺满，没有一个写死的像素宽度。
+**整页响应式**：页面自己不写宽度 —— 返回 `ft.Container`（托一层）里放内容，
+表盘与弦钮簇都是流体宽度，容器多宽就铺多宽；三块的分栏用 ResponsiveRow 的 col 断点
+（手机 3/6/3，宽屏 2/8/2）。全页没有一个写死的像素宽度，也没有固定中间那一条。
 
 声明式：只读 pitch_state / tuner_state / settings_state，采集那边一改状态这里自己重渲染。
 （订阅靠参数：PitchPage 是零参入口，把 observable 传给内层 _Tuner。）
@@ -14,14 +14,7 @@
 
 import flet as ft
 
-from app.theme import (
-    ACCENT,
-    BAD,
-    COL_READOUT,
-    COL_STRINGS,
-    content_width,
-    palette_of,
-)
+from app.theme import ACCENT, BAD, COL_READOUT, COL_STRINGS, palette_of
 from components.meter import cents_meter
 from components.string_buttons import string_column
 from core.pitch import GUITAR_STRINGS, string_freqs
@@ -45,7 +38,6 @@ def PitchPage():
 def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
            settings: SettingsState):
     p = palette_of(theme.name)              # 读参数里的 observable = 订阅
-    row_w = content_width(ft.context.page)
     strings = string_freqs(settings.a4)
     active = tuner.active_string()
 
@@ -82,10 +74,9 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
         ],
     )
 
-    return ft.Column(
+    body = ft.Column(
         spacing=24,
         tight=True,
-        width=row_w,                          # 撑满内容区（宽屏就是整个内容宽，不再缩在中间）
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
             cents_meter(p, cents=pitch.cents, color=color),
@@ -93,6 +84,8 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
             cluster,
         ],
     )
+    # 不自己算宽度：表盘与弦钮簇本身就是流体宽度，Container 只托一层（alignment 让它撑满可用宽度）
+    return ft.Container(alignment=ft.Alignment(0, 0), content=body)
 
 
 def _prompt(p: dict, pitch: PitchState, has_pitch: bool) -> ft.Column:

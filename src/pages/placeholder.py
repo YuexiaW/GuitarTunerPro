@@ -6,7 +6,7 @@
 
 import flet as ft
 
-from app.theme import ACCENT, content_width, palette_of
+from app.theme import ACCENT, palette_of
 from components.nav_dock import NAV_ITEMS
 from models.state import ThemeState, theme_state
 
@@ -25,10 +25,9 @@ def ChordsPage():
 def _Placeholder(index: int, theme: ThemeState):
     p = palette_of(theme.name)
     _route, label, icon, desc = NAV_ITEMS[index]
-    return ft.Column(
+    body = ft.Column(
         spacing=12,
         tight=True,
-        width=content_width(ft.context.page),
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
             ft.Icon(icon, size=46, color=ACCENT),
@@ -39,3 +38,5 @@ def _Placeholder(index: int, theme: ThemeState):
                     size=11, color=p["text_faint"], text_align=ft.TextAlign.CENTER),
         ],
     )
+    # 不写宽度：Container 的 alignment 让它撑满可用宽度，内部文字照旧居中
+    return ft.Container(alignment=ft.Alignment(0, 0), content=body)
