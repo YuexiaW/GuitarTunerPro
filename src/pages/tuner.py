@@ -28,8 +28,10 @@ from services.tuner import start_capture, stop_capture, toggle_lock
 
 NOTES = tuple(GUITAR_STRINGS)                                      # 从第 6 弦到第 1 弦
 STRING_NO = {note: len(NOTES) - i for i, note in enumerate(NOTES)}  # E2 → 6 … E4 → 1
-LEFT_NOTES = NOTES[:3]                                             # 左列：6 / 5 / 4 弦
-RIGHT_NOTES = NOTES[3:]                                            # 右列：3 / 2 / 1 弦
+LEFT_NOTES = tuple(reversed(NOTES[:3]))                            # 左列：4 / 5 / 6 弦（6 弦在最下）
+RIGHT_NOTES = NOTES[3:]                                            # 右列：3 / 2 / 1 弦（1 弦在最下）
+# 顺序照真实 3+3 琴头：越靠近琴枕（下面）的旋钮，弦越粗的那一侧依次是 6/5/4 与 1/2/3
+# （原来左列是 E2 在最上，和右边 1 弦在最下对不上，所以 E2 挪到最下面）
 BASE_HEAD_GAP = 12                                                 # 弦钮列与琴头的基准间距（乘 scale）
 
 
@@ -68,7 +70,7 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
     )
 
     body = ft.Column(
-        spacing=20,
+        spacing=10,
         tight=True,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
