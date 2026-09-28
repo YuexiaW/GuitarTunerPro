@@ -78,6 +78,7 @@ BOTTOM_RESERVE = 200          # 底部悬浮层预留高度：内容滚到底不
 CONTROL_PILL_BOTTOM = 72      # 按钮胶囊贴底偏移（叠在导航条上方，随导航条高度收小）
 
 METER_RANGE = 50.0            # 偏差条量程 ±50 音分
+METER_SIDE_PADDING = 24       # 表盘左右留白：刻度两端别贴着内容区边缘
 METER_TICK_STEP = 5.0         # 刻度间隔（音分）
 METER_MAJOR_EVERY = 5         # 每几根出一个主刻度（5 × 5 = 25 音分一根长的）
 

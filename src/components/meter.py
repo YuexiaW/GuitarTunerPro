@@ -14,7 +14,14 @@
 
 import flet as ft
 
-from app.theme import ACCENT, METER_MAJOR_EVERY, METER_RANGE, METER_TICK_STEP, pointer_glow
+from app.theme import (
+    ACCENT,
+    METER_MAJOR_EVERY,
+    METER_RANGE,
+    METER_SIDE_PADDING,
+    METER_TICK_STEP,
+    pointer_glow,
+)
 from core.constants import IN_TUNE_CENTS
 
 _UNITS = 10          # 权重份数的放大倍数（expand 只收 int，放大后端点处指针更贴边）
@@ -99,21 +106,26 @@ def cents_meter(p: dict, *, cents: float, color: str) -> ft.Control:
         ],
     )
 
-    return ft.Column(
-        spacing=2,
-        tight=True,
-        controls=[
-            ft.Stack(
-                height=_GAUGE_H,
-                controls=[
-                    # 轨道 + 固定居中的绿区
-                    ft.Container(left=0, right=0, top=0, content=track),
-                    # 指针：按音分自己在轨道上走
-                    ft.Container(left=0, right=0, top=0, content=pointer),
-                    # 刻度骑在基线上：上下各留半个主刻度，中心 = 基线
-                    ft.Container(left=0, right=0, top=(_GAUGE_H - _TICK_TALL) / 2, content=mark_row),
-                ],
-            ),
-            labels,
-        ],
+    return ft.Container(
+        # 左右留白：刻度别顶着内容区边缘（量程标签也跟着一起内缩）
+        padding=ft.Padding.symmetric(horizontal=METER_SIDE_PADDING),
+        content=ft.Column(
+            spacing=2,
+            tight=True,
+            controls=[
+                ft.Stack(
+                    height=_GAUGE_H,
+                    controls=[
+                        # 轨道 + 固定居中的绿区
+                        ft.Container(left=0, right=0, top=0, content=track),
+                        # 指针：按音分自己在轨道上走
+                        ft.Container(left=0, right=0, top=0, content=pointer),
+                        # 刻度骑在基线上：上下各留半个主刻度，中心 = 基线
+                        ft.Container(left=0, right=0, top=(_GAUGE_H - _TICK_TALL) / 2,
+                                     content=mark_row),
+                    ],
+                ),
+                labels,
+            ],
+        ),
     )
