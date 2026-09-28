@@ -16,11 +16,9 @@ from app.theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs, bottom_bar_wid
 from components.app_bar import top_bar
 from components.control_pill import control_pill
 from components.nav_dock import TUNER_ROUTE, is_tuner, nav_dock, nav_index
+from core.constants import HELP_TEXT
 from models.state import ThemeState, TunerState, theme_state, tuner_state
 from services.tuner import start_capture, stop_capture
-
-HELP_TEXT = ("拨动单根弦、靠近麦克风；指针停在中间绿区（±5 音分）就是准了。"
-             "点内容区那排弦名可锁定该弦。")
 
 
 @ft.component

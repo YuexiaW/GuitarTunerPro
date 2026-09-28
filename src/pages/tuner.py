@@ -9,7 +9,8 @@ import flet as ft
 from app.theme import ACCENT, BAD, content_width, glass, palette_of
 from components.meter import cents_meter
 from components.string_chips import string_chips
-from core.pitch import GUITAR_STRINGS
+from core.pitch import string_freqs
+from models.settings import SettingsState, settings_state
 from models.state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
 from services.tuner import toggle_lock
 
@@ -19,11 +20,11 @@ HINT_TEXT = "拨动单根弦并靠近麦克风 · 点上面那排弦名可锁定
 @ft.component
 def PitchPage():
     """零参入口（Router 用）"""
-    return _Tuner(theme_state, pitch_state, tuner_state)
+    return _Tuner(theme_state, pitch_state, tuner_state, settings_state)
 
 
 @ft.component
-def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState):
+def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState, settings: SettingsState):
     p = palette_of(theme.name)              # 读参数里的 observable = 订阅
     card_w = content_width(ft.context.page)
 
@@ -82,7 +83,7 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState):
         tight=True,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            string_chips(p, GUITAR_STRINGS, active=tuner.active_string(),
+            string_chips(p, string_freqs(settings.a4), active=tuner.active_string(),
                          on_pick=toggle_lock, width=card_w),
             note_card,
             meter_card,

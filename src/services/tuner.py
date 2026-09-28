@@ -9,7 +9,8 @@ import time
 import flet as ft
 
 from core.constants import IN_TUNE_CENTS, SAMPLE_RATE, UPDATE_INTERVAL
-from core.pitch import GUITAR_STRINGS, PitchAnalyzer, nearest_string
+from core.pitch import PitchAnalyzer, nearest_string
+from models.settings import settings_state
 from models.state import pitch_state, tuner_state
 from services.recorder import PERMISSION_DENIED, RecorderService
 
@@ -66,7 +67,7 @@ def _on_frame(frame: bytes):
         return
     tuner_state.last_update = now
 
-    note, _target, cents = nearest_string(freq, tuner_state.locked)
+    note, _target, cents = nearest_string(freq, tuner_state.locked, settings_state.a4)
     if not tuner_state.locked:       # 弦条跟随自动识别（锁定时不覆盖）
         tuner_state.detected = note
     pitch_state.show(note, freq, cents, abs(cents) <= IN_TUNE_CENTS)

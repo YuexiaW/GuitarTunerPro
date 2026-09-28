@@ -10,7 +10,7 @@ import os
 
 import numpy as np
 
-from core.constants import SIG_GATE
+from core.constants import A4_STANDARD, SIG_GATE
 from core.tuner_engine import HAS_AUDIOFLUX, AcfDetector
 
 if HAS_AUDIOFLUX:
@@ -40,18 +40,27 @@ def cents_from(freq: float, ref: float) -> float:
     return 1200.0 * math.log2(freq / ref)
 
 
-def nearest_string(freq: float, locked: str | None = None) -> tuple[str, float, float]:
-    """返回 (弦名, 该弦标准频率, 音分偏差)
+def string_freqs(a4: float = A4_STANDARD) -> dict[str, float]:
+    """按参考音缩放的标准调弦（A4=432 时所有目标频率 ×432/440）"""
+    k = a4 / A4_STANDARD
+    return {note: freq * k for note, freq in GUITAR_STRINGS.items()}
+
+
+def nearest_string(freq: float, locked: str | None = None,
+                   a4: float = A4_STANDARD) -> tuple[str, float, float]:
+    """返回 (弦名, 该弦目标频率, 音分偏差)
 
     锁定了某根弦就相对它算偏差（允许超出 ±50 音分，显示时再截断），
-    否则取频率上最接近的那根弦。
+    否则取频率上最接近的那根弦。目标频率按参考音 A4 缩放。
     """
+    targets = string_freqs(a4)
+
     if locked:
-        target = GUITAR_STRINGS[locked]
+        target = targets[locked]
         return locked, target, cents_from(freq, target)
 
     best_note, target_freq, min_diff = "?", 0.0, float("inf")
-    for note, ref_freq in GUITAR_STRINGS.items():
+    for note, ref_freq in targets.items():
         diff = abs(freq - ref_freq)
         if diff < min_diff:
             min_diff = diff

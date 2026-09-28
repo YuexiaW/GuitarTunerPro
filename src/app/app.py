@@ -5,7 +5,7 @@ Router manage_views=True（View 由 Layout 产出，支持系统返回手势与 
     /            调音（PitchPage）
     /metronome   节拍器（占位）
     /chords      和弦（占位）
-    /mine        我的（占位）
+    /mine        我的
 """
 
 import asyncio
@@ -16,7 +16,9 @@ import flet as ft
 from app.layout import Layout
 from components.app_bar import apply_theme
 from core.constants import APP_TITLE
-from pages.placeholder import ChordsPage, MetronomePage, MinePage
+from models.settings import settings_state
+from pages.mine import MinePage
+from pages.placeholder import ChordsPage, MetronomePage
 from pages.tuner import PitchPage
 from services.tuner import attach, start_capture
 
@@ -53,6 +55,7 @@ def main(page: ft.Page):
 
     attach(page, on_message=show_message)
     page.render_views(App)               # manage_views=True 必须用 render_views
+    settings_state.load(page)            # 读取上次的偏好（参考音 A4）；读不到就用默认值
 
     # 本地调试：TUNER_AUTOSTART=1 启动后自动开麦
     if os.environ.get("TUNER_AUTOSTART"):
