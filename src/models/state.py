@@ -11,7 +11,7 @@
 
 import flet as ft
 
-from core.constants import DEFAULT_THEME
+from core.constants import DEFAULT_THEME, MODE_AUTO, MODE_PRECISE
 
 
 @ft.observable
@@ -25,15 +25,20 @@ class ThemeState:
 class TunerState:
     """调音过程状态（锁定弦 / 识别弦 / 是否采集 / 采集缓冲）"""
 
-    locked: str | None = None           # 手动锁定的弦（None = 自动识别）
+    mode: str = MODE_AUTO               # 识别模式："auto"（自动找弦）/ "precise"（指定弦）
+    locked: str | None = None           # 精准模式下指定的目标弦（自动模式恒为 None）
     detected: str | None = None         # 当前自动识别到的弦
     running: bool = False               # 是否正在采集
     stream_bytes: int = 0               # 流式收到的字节数（判断 on_stream 是否真在推数据）
     last_update: float = 0.0            # 上次推给 UI 的时间（渲染节流用）
     buffer: bytearray = bytearray()     # 未凑满一帧的剩余 PCM16（原地改，不参与渲染）
 
+    def precise(self) -> bool:
+        """是否精准识别模式（偏差只相对指定弦算）"""
+        return self.mode == MODE_PRECISE
+
     def active_string(self):
-        """当前高亮的弦：手动锁定优先，其次自动识别"""
+        """当前高亮的弦：精准模式看指定的弦，自动模式看识别结果"""
         return self.locked or self.detected
 
     def reset_capture(self):

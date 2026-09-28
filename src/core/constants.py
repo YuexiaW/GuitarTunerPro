@@ -16,6 +16,8 @@ HELP_TEXT = ("拨动单根弦、靠近麦克风；指针停在中间绿区（±5
 
 # --- 调音判定 ---
 IN_TUNE_CENTS = 5.0      # 「准了」绿区 ±5 音分（检测与偏差条共用）
+MODE_AUTO = "auto"       # 自动识别模式：按测到的频率自己找最近的弦
+MODE_PRECISE = "precise"  # 精准识别模式：先指定一根弦，偏差只相对它算
 DEFAULT_THEME = "dark"   # 启动主题："dark" / "light"
 
 # --- 参考音（A4）：影响所有弦的目标频率 ---

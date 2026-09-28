@@ -42,7 +42,7 @@ def string_button(p: dict, note: str, number: int, *, size: float, freq: float,
         alignment=ft.Alignment(0, 0),
         animate=ft.Animation(220, ft.AnimationCurve.EASE_OUT),
         ink=True,
-        tooltip=f"{number} 弦 {note} · {freq:.2f} Hz（点一下锁定该弦）",
+        tooltip=f"{number} 弦 {note} · {freq:.2f} Hz（点一下认准这根弦，切到精准识别）",
         on_click=lambda e, n=note: on_pick(n),
         content=ft.Column(
             spacing=0,

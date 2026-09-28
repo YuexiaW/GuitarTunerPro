@@ -1,15 +1,16 @@
 """services/tuner.py —— 调音编排：采集 → 检测 → 状态（UI 只读状态，不认识采集/检测细节）
 
-main() 里 attach(page) 一次；之后组件把 start_capture / stop_capture / toggle_lock 当回调传。
-检测算法在 pitch.py（纯 Python、不认识 flet），采集在 services/recorder.py。
+main() 里 attach(page) 一次；之后组件把 start_capture / stop_capture / set_mode / pick_string
+当回调传。检测算法在 pitch.py（纯 Python、不认识 flet），采集在 services/recorder.py。
 """
 
 import time
 
 import flet as ft
 
-from core.constants import IN_TUNE_CENTS, ROUTE_TUNER, SAMPLE_RATE, UPDATE_INTERVAL
-from core.pitch import PitchAnalyzer, nearest_string
+from core.constants import (IN_TUNE_CENTS, MODE_AUTO, MODE_PRECISE, ROUTE_TUNER,
+                            SAMPLE_RATE, UPDATE_INTERVAL)
+from core.pitch import GUITAR_STRINGS, PitchAnalyzer, nearest_string
 from models.settings import settings_state
 from models.state import pitch_state, tuner_state
 from services.recorder import PERMISSION_DENIED, RecorderService
@@ -30,9 +31,23 @@ def attach(page: ft.Page, on_message):
 
 
 # ---------- 对外动作（组件直接当回调传） ----------
-def toggle_lock(note: str):
-    """点弦 = 锁定该弦（偏差相对它算）；再点一次 = 取消锁定回到自动识别"""
-    tuner_state.locked = None if tuner_state.locked == note else note
+def set_mode(mode: str):
+    """切换识别模式：自动识别（自己找弦）/ 精准识别（只算指定的弦）
+
+    精准识别必须有目标弦 —— 没目标就算不出「相对它偏多少」，
+    所以切过去时给一个：优先用上一次识别到的弦，还没识别过就先拿 6 弦 E2。
+    """
+    if mode == MODE_PRECISE:
+        tuner_state.locked = tuner_state.locked or tuner_state.detected or GUITAR_STRINGS[0]
+    else:
+        tuner_state.locked = None       # 回自动模式：清掉指定弦，识别结果重新接管
+    tuner_state.mode = mode
+
+
+def pick_string(note: str):
+    """点弦钮 = 认准这根弦（顺手切到精准识别，免得还要再点一下模式）"""
+    tuner_state.mode = MODE_PRECISE
+    tuner_state.locked = note
 
 
 async def start_capture():
@@ -80,7 +95,7 @@ def _on_frame(frame: bytes):
     tuner_state.last_update = now
 
     note, _target, cents = nearest_string(freq, tuner_state.locked, settings_state.a4)
-    if not tuner_state.locked:       # 弦条跟随自动识别（锁定时不覆盖）
+    if tuner_state.mode == MODE_AUTO:  # 只有自动模式刷新识别结果（界面对准的是自动找的弦）
         tuner_state.detected = note
     in_tune = abs(cents) <= IN_TUNE_CENTS
     was_in_tune = pitch_state.in_tune
@@ -89,4 +104,4 @@ def _on_frame(frame: bytes):
         settings_state.add_in_tune_hit()
 
 
-__all__ = ["attach", "go", "start_capture", "stop_capture", "toggle_lock"]
+__all__ = ["attach", "go", "pick_string", "set_mode", "start_capture", "stop_capture"]
