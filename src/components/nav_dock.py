@@ -52,11 +52,11 @@ def nav_dock(p: dict, *, index: int, on_select,
         content=ft.SafeArea(
             # bottom= 在 1.x 里是内边距不是开关，安全区开关是 avoid_intrusions_bottom
             avoid_intrusions_bottom=True,
-            minimum_padding=ft.Padding.only(left=12, right=12, bottom=12),
+            minimum_padding=ft.Padding.only(left=12, right=12, bottom=8),
             content=ft.Container(
-                **glass(p, 28),
+                **glass(p, 24),
                 width=width,                # 宽度上限（宽屏对齐内容卡片，窄屏随窗口）
-                padding=ft.Padding.symmetric(vertical=6, horizontal=10),
+                padding=ft.Padding.symmetric(vertical=4, horizontal=8),
                 content=row,
             ),
         ),
@@ -68,20 +68,20 @@ def _item(p: dict, i: int, selected: bool, on_select) -> ft.Container:
     return ft.Container(
         content=ft.Column(
             controls=[
-                ft.Icon(icon, size=22, color=ACCENT if selected else p["text_dim"]),
-                ft.Text(label, size=11,
+                ft.Icon(icon, size=18, color=ACCENT if selected else p["text_dim"]),
+                ft.Text(label, size=10,
                         color=p["text"] if selected else p["text_dim"],
                         weight=ft.FontWeight.W_600 if selected else ft.FontWeight.W_400,
                         no_wrap=True),
             ],
-            spacing=2,
+            spacing=1,
             tight=True,
             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         ),
         col=NAV_COL,                        # 宽度由网格算，不写死
         alignment=ft.Alignment(0, 0),
-        padding=ft.Padding.symmetric(vertical=6, horizontal=4),
-        border_radius=ft.BorderRadius.all(22),
+        padding=ft.Padding.symmetric(vertical=3, horizontal=2),
+        border_radius=ft.BorderRadius.all(18),
         animate=ft.Animation(220, ft.AnimationCurve.EASE_OUT),
         ink=True,
         tooltip=f"{label} · {desc}",
