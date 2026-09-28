@@ -1,4 +1,4 @@
-"""占位页（节拍器 / 和弦 / 设置）
+"""占位页（节拍器 / 和弦 / 我的）
 
 路由、切换、高亮都是真的，页内功能后续换成真实实现：把对应组件替换即可。
 （订阅靠参数：零参入口 → 把 theme_state 传给内层 _Placeholder。）
@@ -22,7 +22,7 @@ def ChordsPage():
 
 
 @ft.component
-def SettingsPage():
+def MinePage():
     return _Placeholder(3, theme_state)
 
 

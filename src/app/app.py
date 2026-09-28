@@ -5,7 +5,7 @@ Router manage_views=True（View 由 Layout 产出，支持系统返回手势与 
     /            调音（PitchPage）
     /metronome   节拍器（占位）
     /chords      和弦（占位）
-    /settings    设置（占位）
+    /mine        我的（占位）
 """
 
 import asyncio
@@ -16,7 +16,7 @@ import flet as ft
 from app.layout import Layout
 from components.app_bar import apply_theme
 from core.constants import APP_TITLE
-from pages.placeholder import ChordsPage, MetronomePage, SettingsPage
+from pages.placeholder import ChordsPage, MetronomePage, MinePage
 from pages.tuner import PitchPage
 from services.tuner import attach, start_capture
 
@@ -32,7 +32,7 @@ def App():
                     ft.Route(index=True, component=PitchPage),        # "/"
                     ft.Route(path="metronome", component=MetronomePage),
                     ft.Route(path="chords", component=ChordsPage),
-                    ft.Route(path="settings", component=SettingsPage),
+                    ft.Route(path="mine", component=MinePage),
                 ],
             ),
         ],
