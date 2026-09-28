@@ -1,7 +1,7 @@
-"""调音页：数字读数 → 音分刻度表盘 → 操作提示 → 「左三弦 | 琴头 | 右三弦」→ 开始/停止
+"""调音页：数字读数（音名 + 频率）→ 音分刻度表盘 → 操作提示 → 「左三弦 | 琴头 | 右三弦」→ 开始/停止
 
-版式参考目标图：读数（音符/频率/音分）放大放在最上，下面接带刻度的横向表盘
-（基线 + 每 5 音分刻度 + 中央固定容错区 + 细竖线指针 + -50/0/+50 标注），
+版式参考目标图：读数放大放在最上（音名 + 频率，偏差交给下面的表盘），
+下面接带刻度的横向表盘（基线 + 每 5 音分刻度 + 中央固定容错区 + 细竖线指针 + -50/0/+50 标注），
 再下面是操作提示，然后**固定两列弦钮夹着中间的琴头**，最后是本页的采集按钮。
 内容平铺在渐变底上，不套卡片 —— 毛玻璃只属于底部导航条。
 
@@ -52,20 +52,17 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
     has_pitch = pitch.has_pitch()
     color = ACCENT if pitch.in_tune else BAD
     note_color = color if has_pitch else p["text_faint"]
-    cents_color = color if has_pitch else p["text_faint"]
 
     # 数字读数放大，放在刻度表盘的上面（先看数、再对照刻度）
+    # 只留音名 + 频率：偏差看下面表盘的指针/绿区就够了，不再单列一行音分数值
     readout = ft.Column(
         spacing=0,
         tight=True,
         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
         controls=[
-            # 大音符：行高用默认（height=0.92 压紧那版看着憋，不好看）
             ft.Text(pitch.note, size=118, weight=ft.FontWeight.BOLD, color=note_color),
             ft.Text(f"{pitch.freq:.1f} Hz" if has_pitch else "-- Hz",
                     size=26, color=p["text_dim"]),
-            ft.Text(f"{pitch.cents:+.1f} 音分" if has_pitch else "0.0 音分",
-                    size=18, color=cents_color),
         ],
     )
 
