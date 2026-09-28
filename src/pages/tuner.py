@@ -1,8 +1,8 @@
-"""调音页：数字读数 → 音分刻度表盘 → 操作提示 → 「左三弦 | 琴头 | 右三弦」
+"""调音页：数字读数 → 音分刻度表盘 → 操作提示 → 「左三弦 | 琴头 | 右三弦」→ 开始/停止
 
 版式参考目标图：读数（音符/频率/音分）放大放在最上，下面接带刻度的横向表盘
 （基线 + 每 5 音分刻度 + 中央固定容错区 + 细竖线指针 + -50/0/+50 标注），
-再下面是操作提示，最后是**固定两列弦钮夹着中间的琴头**。
+再下面是操作提示，然后**固定两列弦钮夹着中间的琴头**，最后是本页的采集按钮。
 内容平铺在渐变底上，不套卡片 —— 毛玻璃只属于底部导航条。
 
 **整页响应式**：页面自己不写宽度 —— 返回 `ft.Container`（托一层）里放内容，
@@ -17,13 +17,14 @@
 import flet as ft
 
 from app.theme import ACCENT, BAD, control_scale, palette_of
+from components.capture_buttons import capture_buttons
 from components.headstock import headstock
 from components.meter import cents_meter
 from components.string_buttons import button_pitch, button_size, column_height, string_column
 from core.pitch import GUITAR_STRINGS, string_freqs
 from models.settings import SettingsState, settings_state
 from models.state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
-from services.tuner import toggle_lock
+from services.tuner import start_capture, stop_capture, toggle_lock
 
 NOTES = tuple(GUITAR_STRINGS)                                      # 从第 6 弦到第 1 弦
 STRING_NO = {note: len(NOTES) - i for i, note in enumerate(NOTES)}  # E2 → 6 … E4 → 1
@@ -88,6 +89,8 @@ def _Tuner(theme: ThemeState, pitch: PitchState, tuner: TunerState,
                                   active=active, on_pick=toggle_lock),
                 ],
             ),
+            # 采集按钮属于本页操作，放内容区里（不再叠在全局导航条上）
+            capture_buttons(p, scale=scale, on_start=start_capture, on_stop=stop_capture),
         ],
     )
     # 不自己算宽度：表盘是流体宽度，Container 只托一层（alignment 让它撑满可用宽度）

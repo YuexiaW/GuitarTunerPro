@@ -3,23 +3,23 @@
 一个 View 承载所有底部导航页（同级菜单 = 一层 View），点导航只换 outlet 子树：
   背景：View.decoration 渐变 + 三个模糊光斑
   顶部：AppBar 三段槽（logo / 应用名 + 实时状态 / 使用说明 + 主题切换）
-  底部：自绘悬浮毛玻璃层（导航条 + 开始·停止胶囊），内容从玻璃底下滑过被糊掉
+  底部：自绘悬浮毛玻璃层（只有导航条 —— 它才是全局的），内容从玻璃底下滑过被糊掉
+
+调音页的「开始/停止」按钮**不在这里**：那是调音页自己的操作，归 pages/tuner.py 内容区。
 
 订阅规则（踩过的坑）：组件**只对作为参数传入**的 observable 订阅 ——
 Router 是零参调用 `route.component()`，所以这里写成「零参入口 + 把状态当参数传给内层组件」，
 内层 _Shell 收到 theme 这个 observable，主题一变整棵重渲染。
-（采集状态不用传进来：开始/停止按钮是常驻的，不需要跟着状态变。）
 """
 
 import flet as ft
 
-from app.theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs, bottom_bar_width, palette_of
+from app.theme import BOTTOM_RESERVE, blobs, bottom_bar_width, palette_of
 from components.app_bar import top_bar
-from components.control_pill import control_pill
-from components.nav_dock import is_tuner, nav_dock, nav_index
+from components.nav_dock import nav_dock, nav_index
 from core.constants import HELP_TEXT
 from models.state import ThemeState, theme_state
-from services.tuner import go, start_capture, stop_capture
+from services.tuner import go
 
 
 @ft.component
@@ -82,15 +82,8 @@ def _Shell(outlet: ft.Control, location: str, theme: ThemeState):
                             ],
                         ),
                     ),
-                    ft.Container(                    # [4] 按钮胶囊（只属于调音页）
-                        left=0, right=0, bottom=CONTROL_PILL_BOTTOM,
-                        alignment=ft.Alignment(0, 0),
-                        visible=is_tuner(location),
-                        content=control_pill(p, on_start=start_capture,
-                                             on_stop=stop_capture),
-                    ),
                     nav_dock(p, index=nav_index(location), on_select=on_nav_select,
-                             width=bottom_bar_width(page)),   # [5] 宽屏对齐卡片，窄屏随窗口
+                             width=bottom_bar_width(page)),   # [4] 宽屏对齐卡片，窄屏随窗口
                 ],
             ),
         ],

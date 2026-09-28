@@ -34,10 +34,6 @@ def nav_index(location: str) -> int:
     return 0
 
 
-def is_tuner(location: str) -> bool:
-    return nav_index(location) == 0
-
-
 def nav_dock(p: dict, *, index: int, on_select,
              width: float | None = None) -> ft.Control:
     row = ft.ResponsiveRow(
