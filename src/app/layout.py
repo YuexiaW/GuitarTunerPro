@@ -7,7 +7,8 @@
 
 订阅规则（踩过的坑）：组件**只对作为参数传入**的 observable 订阅 ——
 Router 是零参调用 `route.component()`，所以这里写成「零参入口 + 把状态当参数传给内层组件」，
-内层 _Shell 收到 theme / tuner 两个 observable，它们一变就会重渲染。
+内层 _Shell 收到 theme 这个 observable，主题一变整棵重渲染。
+（采集状态不用传进来：开始/停止按钮是常驻的，不需要跟着状态变。）
 """
 
 import flet as ft
@@ -15,10 +16,10 @@ import flet as ft
 from app.theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs, bottom_bar_width, palette_of
 from components.app_bar import top_bar
 from components.control_pill import control_pill
-from components.nav_dock import TUNER_ROUTE, is_tuner, nav_dock, nav_index
+from components.nav_dock import is_tuner, nav_dock, nav_index
 from core.constants import HELP_TEXT
-from models.state import ThemeState, TunerState, theme_state, tuner_state
-from services.tuner import start_capture, stop_capture
+from models.state import ThemeState, theme_state
+from services.tuner import go, start_capture, stop_capture
 
 
 @ft.component
@@ -26,11 +27,11 @@ def Layout():
     """零参入口（Router 用）：取路由信息，把可观察状态传给内层"""
     outlet = ft.use_route_outlet()
     location = ft.use_route_location()
-    return _Shell(outlet, location, theme_state, tuner_state)
+    return _Shell(outlet, location, theme_state)
 
 
 @ft.component
-def _Shell(outlet: ft.Control, location: str, theme: ThemeState, tuner: TunerState):
+def _Shell(outlet: ft.Control, location: str, theme: ThemeState):
     p = palette_of(theme.name)               # 参数里的 observable：读它 = 订阅
     page = ft.context.page
 
@@ -39,11 +40,8 @@ def _Shell(outlet: ft.Control, location: str, theme: ThemeState, tuner: TunerSta
                                       duration=ft.Duration(seconds=4)))
 
     def on_nav_select(route: str):
-        """切页：离开调音页先停采集（麦克风别留在后台跑）"""
-        if route != TUNER_ROUTE and tuner.running:
-            page.run_task(stop_capture)
-        if route != location:
-            page.navigate(route)
+        """切页：离开调音页先停采集（逻辑在 services.tuner.go，「我的」页快捷入口共用）"""
+        go(page, route, location)
 
     return ft.View(
         route="/",                           # 同级菜单共用一层 View（Router manage_views）

@@ -37,6 +37,8 @@ PALETTES = {
         sel_text=ACCENT,
         line=ft.Colors.with_opacity(0.12, _WHITE),          # 分隔细线
         avatar_bg=ft.Colors.with_opacity(0.30, _BLACK),      # 头像内圈（平铺，不模糊）
+        surface="#161B22",                                   # 实心卡片底（不透明，不是毛玻璃）
+        surface_border=ft.Colors.with_opacity(0.10, _WHITE),
         track_bg=ft.Colors.with_opacity(0.16, _WHITE),      # 偏差条轨道
         stop_bg=ft.Colors.with_opacity(0.18, _WHITE),
         stop_fg=_WHITE,
@@ -61,6 +63,8 @@ PALETTES = {
         sel_text="#0F8A56",                                 # 浅色底下绿字要压深才看得清
         line=ft.Colors.with_opacity(0.12, _BLACK),
         avatar_bg=ft.Colors.with_opacity(0.55, _WHITE),
+        surface=_WHITE,                                      # 参考图里的白卡
+        surface_border=ft.Colors.with_opacity(0.08, _BLACK),
         track_bg=ft.Colors.with_opacity(0.10, _BLACK),
         stop_bg=ft.Colors.with_opacity(0.06, _BLACK),
         stop_fg="#1A1A1A",
@@ -175,8 +179,21 @@ def selected_text(p: dict, selected: bool, default: str | None = None) -> str:
     return p["sel_text"] if selected else (default or p["text"])
 
 
+def card(p: dict, radius: int = 20, padding=(16, 16)) -> dict:
+    """实心卡片：**不透明**底 + 一圈细描边，没有模糊/投影（不是毛玻璃那种透明框）
+
+    深色主题是近黑的实色块，浅色主题是白块 —— 对应参考图里「浅灰底 + 白卡」的层次。
+    """
+    return dict(
+        bgcolor=p["surface"],
+        border_radius=ft.BorderRadius.all(radius),
+        border=ft.Border.all(1, p["surface_border"]),
+        padding=ft.Padding.symmetric(vertical=padding[0], horizontal=padding[1]),
+    )
+
+
 def hairline(p: dict, width=None) -> ft.Container:
-    """细分隔线：页面不套卡片，靠留白 + 细线分区"""
+    """细分隔线：行与行、分节之间用它，比卡片描边更淡"""
     return ft.Container(height=1, width=width, bgcolor=p["line"])
 
 

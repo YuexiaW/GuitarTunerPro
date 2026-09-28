@@ -8,7 +8,7 @@ import time
 
 import flet as ft
 
-from core.constants import IN_TUNE_CENTS, SAMPLE_RATE, UPDATE_INTERVAL
+from core.constants import IN_TUNE_CENTS, ROUTE_TUNER, SAMPLE_RATE, UPDATE_INTERVAL
 from core.pitch import PitchAnalyzer, nearest_string
 from models.settings import settings_state
 from models.state import pitch_state, tuner_state
@@ -47,12 +47,24 @@ async def start_capture():
         _message(f"❌ 无法打开麦克风！{result}")
         return
     _message("🎤 正在监听音频...")
+    settings_state.add_session()     # 计数：这次开始调音记一笔（「我的」页数据行）
 
 
 async def stop_capture():
     await _recorder.stop()
     tuner_state.detected = None
     pitch_state.reset()
+
+
+def go(page, route: str, current: str | None = None):
+    """统一切页：离开调音页先停采集（导航条与「我的」页快捷入口共用这一处）
+
+    直接 page.navigate 会绕过停采集，麦克风就留在后台跑了。
+    """
+    if route != ROUTE_TUNER and tuner_state.running:
+        page.run_task(stop_capture)
+    if route != current:
+        page.navigate(route)
 
 
 # ---------- 内部：一帧 PCM16 → 状态 ----------
@@ -70,7 +82,11 @@ def _on_frame(frame: bytes):
     note, _target, cents = nearest_string(freq, tuner_state.locked, settings_state.a4)
     if not tuner_state.locked:       # 弦条跟随自动识别（锁定时不覆盖）
         tuner_state.detected = note
-    pitch_state.show(note, freq, cents, abs(cents) <= IN_TUNE_CENTS)
+    in_tune = abs(cents) <= IN_TUNE_CENTS
+    was_in_tune = pitch_state.in_tune
+    pitch_state.show(note, freq, cents, in_tune)
+    if in_tune and not was_in_tune:  # 跨进绿区那一下记一次「调准」（计数用在「我的」页）
+        settings_state.add_in_tune_hit()
 
 
-__all__ = ["attach", "start_capture", "stop_capture", "toggle_lock"]
+__all__ = ["attach", "go", "start_capture", "stop_capture", "toggle_lock"]

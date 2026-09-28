@@ -28,6 +28,9 @@ NICKNAME_MAX = 12
 DEFAULT_AVATAR = "🎸"
 AVATAR_CHOICES = ("🎸", "🎵", "🎤", "🎧", "🥁", "🎹")
 
+# --- 路由 ---
+ROUTE_TUNER = "/"        # 调音页路由（离开它要停采集，「我的」页快捷入口也用它）
+
 # --- 设置文件 ---
 SETTINGS_FILE = "settings.json"
 

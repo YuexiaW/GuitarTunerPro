@@ -13,6 +13,7 @@
 
 import json
 import os
+from datetime import date
 from pathlib import Path
 
 import flet as ft
@@ -32,11 +33,16 @@ def _settings_dir() -> Path:
 
 @ft.observable
 class SettingsState:
-    """用户偏好（可观察：页面上改了立刻重渲染）"""
+    """用户偏好 + 使用计数（可观察：页面上改了立刻重渲染）"""
 
-    a4: float = A4_STANDARD          # 参考音，440 为标准音高
+    a4: float = A4_STANDARD           # 参考音，440 为标准音高
     nickname: str = DEFAULT_NICKNAME  # 「我的」页昵称
-    avatar: str = DEFAULT_AVATAR     # 头像（先是一枚 emoji，换图片是后续的事）
+    avatar: str = DEFAULT_AVATAR      # 头像（先是一枚 emoji，换图片是后续的事）
+
+    # 使用计数：都是真实累加，用来填「我的」页数据行（不写死假数据）
+    sessions: int = 0                 # 点「开始调音」的次数
+    in_tune_hits: int = 0             # 调准次数（每次从「不准」跨进绿区记一次）
+    first_run: str = ""               # 首次使用日期 YYYY-MM-DD
 
     def path(self) -> Path:
         """配置文件路径（第一次用到时才定下来，之后不再变）"""
@@ -61,14 +67,30 @@ class SettingsState:
         avatar = data.get("avatar")
         if isinstance(avatar, str) and avatar:
             self.avatar = avatar
+        for key in ("sessions", "in_tune_hits"):
+            value = data.get(key)
+            if isinstance(value, (int, float)) and value >= 0:
+                setattr(self, key, int(value))
+        first_run = data.get("first_run")
+        if isinstance(first_run, str) and first_run:
+            self.first_run = first_run
 
     def save(self):
         try:
             path = self.path()
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(
-                json.dumps({"a4": self.a4, "nickname": self.nickname, "avatar": self.avatar},
-                           ensure_ascii=False, indent=2),
+                json.dumps(
+                    {
+                        "a4": self.a4,
+                        "nickname": self.nickname,
+                        "avatar": self.avatar,
+                        "sessions": self.sessions,
+                        "in_tune_hits": self.in_tune_hits,
+                        "first_run": self.first_run,
+                    },
+                    ensure_ascii=False, indent=2,
+                ),
                 encoding="utf-8",
             )
         except OSError:
@@ -88,6 +110,27 @@ class SettingsState:
     def set_avatar(self, emoji: str):
         self.avatar = emoji or DEFAULT_AVATAR
         self.save()
+
+    # --- 使用计数 ---
+    def add_session(self):
+        """点一次「开始调音」：计数 +1，顺手记下首次使用日期"""
+        self.sessions = int(self.sessions) + 1
+        if not self.first_run:
+            self.first_run = date.today().isoformat()
+        self.save()
+
+    def add_in_tune_hit(self):
+        """调准一次（从「不准」跨进绿区）：计数 +1"""
+        self.in_tune_hits = int(self.in_tune_hits) + 1
+        self.save()
+
+    def days_used(self) -> int:
+        """使用天数：首次使用那天算第 1 天（没有记录时按 1 天显示）"""
+        try:
+            first = date.fromisoformat(self.first_run)
+        except (TypeError, ValueError):
+            return 1
+        return max(1, (date.today() - first).days + 1)
 
     def is_standard_a4(self) -> bool:
         return abs(self.a4 - A4_STANDARD) < 0.01
