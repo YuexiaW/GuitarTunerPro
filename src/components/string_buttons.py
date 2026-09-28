@@ -1,0 +1,54 @@
+"""六弦圆钮（两列夹住中间读数）：弦号 + 音名，点一下锁定该弦、再点取消
+
+版式参考目标图：不再做一排横胶囊，改成左侧 6/5/4、右侧 3/2/1 两列圆钮，中间留给读数。
+未锁定时高亮自动识别到的那根弦（规则在 services/tuner.py，这里只负责画）。
+"""
+
+import flet as ft
+
+from app.theme import chip_style, selected_text
+
+BUTTON_SIZE = 46        # 圆钮直径（固定尺寸：圆形按钮不吃网格宽度）
+COLUMN_SPACING = 8      # 同列相邻圆钮的间距
+
+
+def string_button(p: dict, note: str, number: int, *, freq: float, selected: bool,
+                  on_pick) -> ft.Container:
+    """一个圆钮：上行弦号、下行音名；选中 = 淡绿底 + 绿描边 + 绿字"""
+    return ft.Container(
+        width=BUTTON_SIZE,
+        height=BUTTON_SIZE,
+        border_radius=ft.BorderRadius.all(BUTTON_SIZE / 2),
+        **chip_style(p, selected),
+        alignment=ft.Alignment(0, 0),
+        animate=ft.Animation(220, ft.AnimationCurve.EASE_OUT),
+        ink=True,
+        tooltip=f"{number} 弦 {note} · {freq:.2f} Hz（点一下锁定该弦）",
+        on_click=lambda e, n=note: on_pick(n),
+        content=ft.Column(
+            spacing=0,
+            tight=True,
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            controls=[
+                ft.Text(str(number), size=17,
+                        weight=ft.FontWeight.W_600 if selected else ft.FontWeight.W_400,
+                        color=selected_text(p, selected)),
+                ft.Text(note, size=9, color=selected_text(p, selected, p["text_dim"])),
+            ],
+        ),
+    )
+
+
+def string_column(p: dict, strings: dict, numbers: dict, notes: tuple, *,
+                  active: str | None, on_pick) -> ft.Column:
+    """一列圆钮；notes 是这一列从上到下的音名顺序"""
+    return ft.Column(
+        spacing=COLUMN_SPACING,
+        tight=True,
+        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+        controls=[
+            string_button(p, note, numbers[note], freq=strings[note],
+                          selected=note == active, on_pick=on_pick)
+            for note in notes
+        ],
+    )

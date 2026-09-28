@@ -78,6 +78,9 @@ BOTTOM_RESERVE = 200          # 底部悬浮层预留高度：内容滚到底不
 CONTROL_PILL_BOTTOM = 72      # 按钮胶囊贴底偏移（叠在导航条上方，随导航条高度收小）
 
 METER_RANGE = 50.0            # 偏差条量程 ±50 音分
+METER_TICK_STEP = 5.0         # 刻度间隔（音分）
+METER_MAJOR_EVERY = 5         # 每几根出一个主刻度（5 × 5 = 25 音分一根长的）
+TUNER_CLUSTER_MAX = 720       # 调音页「弦钮 | 读数 | 弦钮」那一簇的宽度上限
 
 CONTENT_MAX_WIDTH = 1080      # 内容区上限：宽屏把宽度用起来，不缩成窄窄一条
 CONTENT_MIN_WIDTH = 280       # 内容区最窄宽度
@@ -86,7 +89,7 @@ WINDOW_GUTTER_SMALL = 24      # 窄屏（<600）时留白收窄，别浪费手�
 
 BAR_MAX_WIDTH = 560           # 底部悬浮条上限：导航条不跟着大屏拉满
 
-CHIP_ROW_SPACING = 6          # 六弦条的列间距（ResponsiveRow 的 spacing，按 col 自动分宽度）
+CHIP_ROW_SPACING = 6          # 对话框里候选块（头像/参考音）的网格间距
 BOTTOM_BAR_MARGIN = 12        # 底部悬浮条左右安全边距
 
 # 断点别名（ResponsiveRow 的 col 用；手机单列、平板/桌面分栏都靠它）
@@ -94,7 +97,6 @@ COL_FULL = {"xs": 12}
 COL_HALF = {"xs": 12, "md": 6}
 COL_WIDE = {"xs": 12, "md": 7, "lg": 8}
 COL_NARROW = {"xs": 12, "md": 5, "lg": 4}
-COL_PHONE_3 = {"xs": 4, "sm": 2}      # 手机上每行 3 个，≥576 每行 6 个
 
 # 背景光斑的几何（位置/大小固定，颜色与透明度跟着调色板走）
 BLOB_SPEC = [
