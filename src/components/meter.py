@@ -31,6 +31,17 @@ _TICK_TALL = 13      # 主刻度长
 _TICK_SHORT = 7      # 次刻度长
 
 
+def _layer(ctrl: ft.Control) -> ft.Container:
+    """Stack 里的一层：撑满整条带高 + 内容居中
+
+    三层（轨道 / 指针 / 刻度）各自高度不同，如果都从 top=0 起画，
+    基线会停在上半截、刻度却在中线 —— 看上去像「刻度只有下面一半」。
+    统一用这个包一层，基线、指针、刻度就共用同一条中线。
+    """
+    return ft.Container(left=0, right=0, top=0, height=_GAUGE_H,
+                        alignment=ft.Alignment(0, 0), content=ctrl)
+
+
 def cents_meter(p: dict, *, cents: float, color: str) -> ft.Control:
     """音分表盘：cents 正 = 偏高（指针右移），超出量程就贴在端点
 
@@ -116,13 +127,10 @@ def cents_meter(p: dict, *, cents: float, color: str) -> ft.Control:
                 ft.Stack(
                     height=_GAUGE_H,
                     controls=[
-                        # 轨道 + 固定居中的绿区
-                        ft.Container(left=0, right=0, top=0, content=track),
-                        # 指针：按音分自己在轨道上走
-                        ft.Container(left=0, right=0, top=0, content=pointer),
-                        # 刻度骑在基线上：上下各留半个主刻度，中心 = 基线
-                        ft.Container(left=0, right=0, top=(_GAUGE_H - _TICK_TALL) / 2,
-                                     content=mark_row),
+                        # 三层都撑满条带高并居中 → 基线、指针、刻度共用同一条中线
+                        _layer(track),      # 轨道 + 固定居中的绿区
+                        _layer(pointer),    # 指针：按音分自己在轨道上走
+                        _layer(mark_row),   # 刻度：骑在基线上（上下各半）
                     ],
                 ),
                 labels,
