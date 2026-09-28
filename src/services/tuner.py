@@ -24,8 +24,8 @@ def attach(page: ft.Page, on_message):
     _analyzer = PitchAnalyzer(SAMPLE_RATE)
     _message = on_message
     _recorder = RecorderService(page, tuner_state, on_frame=_on_frame,
-                               on_status=set_status,
-                               is_mobile=page.platform.is_mobile())
+                                on_message=_message,
+                                is_mobile=page.platform.is_mobile())
 
 
 # ---------- 对外动作（组件直接当回调传） ----------
@@ -35,7 +35,7 @@ def toggle_lock(note: str):
 
 
 async def start_capture():
-    """开始采集：失败原因直接写状态栏（安卓看不到 stdout，必须上屏）"""
+    """开始采集：失败原因弹 SnackBar 上屏（安卓看不到 stdout，必须让用户看见）"""
     if tuner_state.running:
         return
     result = await _recorder.start()
@@ -43,20 +43,15 @@ async def start_capture():
         _message("需要麦克风权限才能调音。")
         return
     if result:
-        set_status(f"❌ 无法打开麦克风！{result}", "bad")
+        _message(f"❌ 无法打开麦克风！{result}")
         return
-    set_status("🎤 正在监听音频...")
+    _message("🎤 正在监听音频...")
 
 
 async def stop_capture():
     await _recorder.stop()
     tuner_state.detected = None
-    pitch_state.reset("⏸️ 已停止监听")
-
-
-def set_status(text: str, level: str = "dim"):
-    pitch_state.status_text = text
-    pitch_state.status_level = level
+    pitch_state.reset()
 
 
 # ---------- 内部：一帧 PCM16 → 状态 ----------
@@ -72,21 +67,9 @@ def _on_frame(frame: bytes):
     tuner_state.last_update = now
 
     note, _target, cents = nearest_string(freq, tuner_state.locked)
-    in_tune = abs(cents) <= IN_TUNE_CENTS
     if not tuner_state.locked:       # 弦条跟随自动识别（锁定时不覆盖）
         tuner_state.detected = note
-    pitch_state.show(note, freq, cents, in_tune,
-                     pitch_status_text(cents, in_tune),
-                     "accent" if in_tune else "bad")
+    pitch_state.show(note, freq, cents, abs(cents) <= IN_TUNE_CENTS)
 
 
-def pitch_status_text(cents: float, in_tune: bool) -> str:
-    """顶栏状态文案"""
-    if in_tune:
-        return "✅ 音准完美！"
-    arrow = "⬆️ 偏高" if cents > IN_TUNE_CENTS else "⬇️ 偏低"
-    return f"{arrow} {abs(cents):.0f} 音分"
-
-
-__all__ = ["attach", "start_capture", "stop_capture", "toggle_lock", "set_status",
-           "pitch_status_text"]
+__all__ = ["attach", "start_capture", "stop_capture", "toggle_lock"]

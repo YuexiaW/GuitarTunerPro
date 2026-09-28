@@ -26,12 +26,12 @@ PERMISSION_DENIED = "permission"
 class RecorderService:
     """开始/停止采集，凑满一帧就回调 on_frame(PCM16 bytes)"""
 
-    def __init__(self, page: ft.Page, state: TunerState, on_frame, on_status,
+    def __init__(self, page: ft.Page, state: TunerState, on_frame, on_message,
                  *, is_mobile: bool):
         self.page = page
         self.state = state
         self.on_frame = on_frame            # on_frame(frame: bytes)
-        self.on_status = on_status          # on_status(text, level)：level ∈ dim/accent/bad/warn
+        self.on_message = on_message        # on_message(text)：采集异常上屏（SnackBar）
         self.is_mobile = is_mobile
         self.recorder = (
             far.AudioRecorder(on_stream=self.handle_stream)
@@ -116,8 +116,7 @@ class RecorderService:
         """启动后 3 秒仍无任何分片 → 说明该平台 on_stream 不推送"""
         await asyncio.sleep(3)
         if self.state.running and self.state.stream_bytes == 0:
-            self.on_status("⚠️ 已开始录音但没收到音频流（on_stream 未推送），需要换采集方式",
-                           "warn")
+            self.on_message("⚠️ 已开始录音但没收到音频流（on_stream 未推送），需要换采集方式")
 
     # ---------- 桌面端轮询 ----------
     async def _capture_loop(self):

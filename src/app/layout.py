@@ -7,7 +7,7 @@
 
 订阅规则（踩过的坑）：组件**只对作为参数传入**的 observable 订阅 ——
 Router 是零参调用 `route.component()`，所以这里写成「零参入口 + 把状态当参数传给内层组件」，
-内层 _Shell 收到 theme/pitch/tuner 三个 observable，它们一变就会重渲染。
+内层 _Shell 收到 theme / tuner 两个 observable，它们一变就会重渲染。
 """
 
 import flet as ft
@@ -16,7 +16,7 @@ from app.theme import BOTTOM_RESERVE, CONTROL_PILL_BOTTOM, blobs, bottom_bar_wid
 from components.app_bar import top_bar
 from components.control_pill import control_pill
 from components.nav_dock import TUNER_ROUTE, is_tuner, nav_dock, nav_index
-from models.state import PitchState, ThemeState, TunerState, pitch_state, theme_state, tuner_state
+from models.state import ThemeState, TunerState, theme_state, tuner_state
 from services.tuner import start_capture, stop_capture
 
 HELP_TEXT = ("拨动单根弦、靠近麦克风；指针停在中间绿区（±5 音分）就是准了。"
@@ -28,12 +28,11 @@ def Layout():
     """零参入口（Router 用）：取路由信息，把可观察状态传给内层"""
     outlet = ft.use_route_outlet()
     location = ft.use_route_location()
-    return _Shell(outlet, location, theme_state, pitch_state, tuner_state)
+    return _Shell(outlet, location, theme_state, tuner_state)
 
 
 @ft.component
-def _Shell(outlet: ft.Control, location: str,
-           theme: ThemeState, pitch: PitchState, tuner: TunerState):
+def _Shell(outlet: ft.Control, location: str, theme: ThemeState, tuner: TunerState):
     p = palette_of(theme.name)               # 参数里的 observable：读它 = 订阅
     page = ft.context.page
 
@@ -59,8 +58,7 @@ def _Shell(outlet: ft.Control, location: str,
                 colors=p["gradient"],
             )
         ),
-        appbar=top_bar(p, status_text=pitch.status_text, status_level=pitch.status_level,
-                       on_help=show_help),
+        appbar=top_bar(p, on_help=show_help),
         controls=[
             ft.Stack(
                 expand=True,

@@ -1,6 +1,6 @@
 """顶部栏 + 主题切换（全应用唯一处理主题切换的地方）
 
-三段槽位：leading 渐变 logo / title 应用名 + 实时状态 / actions 使用说明 + 主题切换。
+三段槽位：leading 渐变 logo / title 应用名 / actions 使用说明 + 主题切换。
 
 主题切换的三件事都收在本模块：状态（models.state.theme_state.name）、切换动作
 （`_toggle_theme`）、按钮图标与 tooltip。其他模块只按 `theme_state.name` 取色
@@ -12,7 +12,7 @@ Material AppBar 槽位的老问题：leading 会把子控件拉成 leading_width
 
 import flet as ft
 
-from app.theme import ACCENT, status_color
+from app.theme import ACCENT
 from core.constants import APP_NAME
 from models.state import theme_state
 
@@ -33,7 +33,7 @@ def _toggle_theme(e=None):
     apply_theme(ft.context.page)
 
 
-def top_bar(p: dict, *, status_text: str, status_level: str, on_help) -> ft.AppBar:
+def top_bar(p: dict, *, on_help) -> ft.AppBar:
     is_dark = theme_state.name == THEME_DARK      # 读主题状态 → 切换时本组件跟着重渲染
 
     logo = ft.Container(
@@ -46,15 +46,7 @@ def top_bar(p: dict, *, status_text: str, status_level: str, on_help) -> ft.AppB
         ),
         content=ft.Text("🎸", size=18),
     )
-    title = ft.Column(
-        controls=[
-            ft.Text(APP_NAME, size=16, weight=ft.FontWeight.W_600, color=p["text"]),
-            ft.Text(status_text, size=12, color=status_color(status_level, p),
-                    max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
-        ],
-        spacing=0,
-        tight=True,
-    )
+    title = ft.Text(APP_NAME, size=16, weight=ft.FontWeight.W_600, color=p["text"])
     # 主题切换：图标表示「点了会切到哪」（暗色时显示月亮）
     theme_btn = ft.IconButton(
         icon=ft.Icons.DARK_MODE if is_dark else ft.Icons.LIGHT_MODE,

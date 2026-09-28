@@ -188,14 +188,3 @@ def content_width(page) -> float:
 def bottom_bar_width(page) -> float:
     """底部悬浮条宽度：不超过内容上限，也不超过窗口（给窄屏留出安全区左右各 12）"""
     return min(content_width(page), window_width(page) - 24)
-
-
-# ============================================================
-# 状态栏档位 → 颜色
-# ============================================================
-_STATUS_COLORS = {"accent": ACCENT, "bad": BAD, "warn": WARN}
-
-
-def status_color(level: str, p: dict) -> str:
-    """状态栏档位（dim/accent/bad/warn）→ 颜色；dim 跟着主题走"""
-    return _STATUS_COLORS.get(level, p["text_dim"])

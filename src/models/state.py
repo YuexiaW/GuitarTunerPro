@@ -44,35 +44,27 @@ class TunerState:
 
 @ft.observable
 class PitchState:
-    """一次检测结果 + 状态栏文案（调音页与顶栏都读它）"""
+    """一次检测结果（调音页读它：音符 / 频率 / 音分 / 是否准了）"""
 
     note: str = "?"
     freq: float = 0.0
     cents: float = 0.0
     in_tune: bool = False
-    status_text: str = "点击下方「开始调音」以请求麦克风权限"
-    status_level: str = "dim"           # dim / accent / bad / warn
 
     def has_pitch(self) -> bool:
         return self.note != "?"
 
-    def show(self, note: str, freq: float, cents: float, in_tune: bool,
-             status_text: str, status_level: str):
+    def show(self, note: str, freq: float, cents: float, in_tune: bool):
         self.note = note
         self.freq = freq
         self.cents = cents
         self.in_tune = in_tune
-        self.status_text = status_text
-        self.status_level = status_level
 
-    def reset(self, status_text: str | None = None):
+    def reset(self):
         self.note = "?"
         self.freq = 0.0
         self.cents = 0.0
         self.in_tune = False
-        if status_text is not None:
-            self.status_text = status_text
-            self.status_level = "dim"
 
 
 theme_state = ThemeState()
