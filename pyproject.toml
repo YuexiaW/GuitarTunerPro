@@ -8,8 +8,8 @@ authors = [
     { name = "Flet developer", email = "you@example.com" }
 ]
 dependencies = [
-    "flet>=0.86.5",
-    "flet-audio-recorder>=0.86.5",
+    "flet>=1.0.4",
+    "flet-audio-recorder>=1.0.4",
     "numpy>=2.2.6",
 ]
 
@@ -21,12 +21,12 @@ desktop = [
 
 [dependency-groups]
 dev = [
-    "flet-cli>=0.86.5",
-    "flet-desktop>=0.86.5",
-    "flet-web>=0.86.5",
+    "flet-cli>=1.0.4",
+    "flet-desktop>=1.0.4",
+    "flet-web>=1.0.4",
     # Integration testing with `flet test` / pytest. The `test` extra brings in
     # pytest, pytest-asyncio and the screenshot-comparison dependencies.
-    "flet[test]>=0.86.5",
+    "flet[test]>=1.0.4",
     # 仅 Windows 桌面开发需要：audioflux 是桌面音频引擎，CI(Linux)与移动端都用不到
     # （安卓没有 audioflux 二进制，运行时走纯 numpy 回退）
     "audioflux>=0.1.9; sys_platform == 'win32'",
